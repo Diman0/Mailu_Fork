@@ -1,7 +1,7 @@
 <p align="leftr"><img src="docs/assets/logomark.png" alt="Mailu" height="200px"></p>
 
 FORKED Repo for testing purposes. 
-Please go to the {Mailu repo](https://github.com/Mailu/Mailu/) for the real deal.
+Please go to the [Mailu repo](https://github.com/Mailu/Mailu/) for the real deal.
 
 Mailu is a simple yet full-featured mail server as a set of Docker images.
 It is free software (both as in free beer and as in free speech), open to
