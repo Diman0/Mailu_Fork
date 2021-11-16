@@ -1,0 +1,23 @@
+ARG DISTRO=alpine:3.14.2
+ARG VERSION=$MAILU_VERSION
+FROM $DISTRO
+
+ENV TZ Etc/UTC
+
+LABEL VERSION=$VERSION
+RUN echo $VERSION >> /version
+
+# python3 shared with most images
+RUN apk add --no-cache \
+    python3 py3-pip bash tzdata \
+  && pip3 install --upgrade pip
+
+# Image specific layers under this line
+RUN apk add --no-cache fetchmail ca-certificates openssl \
+ && pip3 install requests
+
+RUN mkdir -p /data
+
+COPY fetchmail.py /fetchmail.py
+
+CMD ["/fetchmail.py"]
