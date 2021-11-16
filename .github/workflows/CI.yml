@@ -75,14 +75,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
@@ -145,14 +145,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
@@ -211,14 +211,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
@@ -277,14 +277,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
@@ -343,14 +343,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
@@ -409,14 +409,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
@@ -475,14 +475,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
@@ -547,14 +547,14 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         env:
-          MAILU_VERSION: {{ env.MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
         run: |
           version=$( git tag --list "$MAILU_VERSION.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=$MAILU_VERSION.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master 
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
-          GITHUB_SHA: {{ env.GITHUB_SHA }}
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
       - name: Create folder for storing images
