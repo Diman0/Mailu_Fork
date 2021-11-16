@@ -31,7 +31,7 @@ then
 fi
 
 #Deploy for master. For master we only publish images with tag master
-if [ "$PINNED_MAILU_VERSION" != "" ] && ["$BRANCH" == "master" ]
+if [ "$PINNED_MAILU_VERSION" != "" ] && [ "$BRANCH" == "master" ]
 then
 #Images are built with PINNED_MAILU_VERSION.
 #We are tagging them as well with MAILU_VERSION
