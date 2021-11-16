@@ -562,7 +562,7 @@ jobs:
     needs:
       - deploy
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - name: Extract branch name
         shell: bash
         run: |
