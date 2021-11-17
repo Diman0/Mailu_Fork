@@ -22,10 +22,10 @@ then
   do
     docker tag "${image}":"${PINNED_MAILU_VERSION}" "${image}":${MAILU_VERSION}
   done
-#Push MAILU_VERSION images
-  docker-compose -f tests/build.yml push
 #Push PINNED_MAILU_VERSION images
-  MAILU_VERSION=$PINNED_MAILU_VERSION
+  docker-compose -f tests/build.yml push
+#Push MAILU_VERSION images
+  PINNED_MAILU_VERSION=$MAILU_VERSION
   docker-compose -f tests/build.yml push
   exit 0
 fi
