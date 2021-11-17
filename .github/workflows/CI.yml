@@ -9,10 +9,6 @@ on:
       - '1.7'
       - '1.8'
       - master
-      # version tags, e.g. 1.7.1
-      - '[1-9].[0-9].[0-9]'
-      # pre-releases, e.g. 1.8-pre1
-      - 1.8-pre[0-9]
       # test branches, e.g. test-debian
       - test-*
 
@@ -47,6 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -115,6 +114,9 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -179,6 +181,9 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -243,6 +248,9 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -307,6 +315,9 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -371,6 +382,9 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -435,6 +449,9 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -505,6 +522,9 @@ jobs:
       - test-webdav
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -570,6 +590,9 @@ jobs:
       - deploy
     steps:
       - uses: actions/checkout@v2
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Extract branch name
         shell: bash
         run: |
@@ -607,3 +630,4 @@ jobs:
     steps:
       - name: CI/CD succeeded.
         run: exit 0
+
