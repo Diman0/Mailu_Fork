@@ -1,5 +1,4 @@
 ARG DISTRO=alpine:3.14.2
-ARG VERSION=$MAILU_VERSION
 FROM $DISTRO as builder
 WORKDIR /tmp
 RUN apk add git build-base automake autoconf libtool dovecot-dev xapian-core-dev icu-dev
@@ -12,10 +11,10 @@ RUN git clone https://github.com/grosjo/fts-xapian.git \
   && make install
 
 FROM $DISTRO
-
+ARG VERSION
 ENV TZ Etc/UTC
 
-LABEL VERSION=$VERSION
+LABEL version=$VERSION
 RUN echo $VERSION >> /version
 
 # python3 shared with most images

@@ -75,7 +75,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -101,7 +101,8 @@ jobs:
         run: echo "$DOCKER_PW" | docker login --username $DOCKER_UN --password-stdin
       - name: Build all docker images
         env:
-          MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
         run: docker-compose -f tests/build.yml build
       - name: Save all docker images
@@ -142,7 +143,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -167,7 +168,8 @@ jobs:
       - name: Test core suite
         run: python tests/compose/test.py core 2
         env:
-          MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-fetchmail:
@@ -205,7 +207,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -230,7 +232,8 @@ jobs:
       - name: Test fetch
         run: python tests/compose/test.py fetchmail 2
         env:
-          MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-filters:
@@ -268,7 +271,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -293,7 +296,8 @@ jobs:
       - name: Test clamvav
         run: python tests/compose/test.py filters 3
         env:
-          MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-rainloop:
@@ -331,7 +335,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -356,7 +360,8 @@ jobs:
       - name: Test rainloop
         run: python tests/compose/test.py rainloop 2
         env:
-          MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-roundcube:
@@ -394,7 +399,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -419,7 +424,8 @@ jobs:
       - name: Test roundcube
         run: python tests/compose/test.py roundcube 2
         env:
-          MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-webdav:
@@ -457,7 +463,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -482,7 +488,8 @@ jobs:
       - name: Test webdav
         run: python tests/compose/test.py webdav 2
         env:
-          MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   deploy:
@@ -526,7 +533,7 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version:0:3};patch_version=${version:4:4};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master 
+      - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
         env:
@@ -557,7 +564,7 @@ jobs:
           BRANCH: ${{ env.BRANCH }}
         run: bash tests/deploy.sh
 
-  tag-release:  
+  tag-release:
     runs-on: ubuntu-latest
     needs:
       - deploy
@@ -583,7 +590,7 @@ jobs:
       - name: Tag and create release
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
         uses: ncipollo/release-action@v1
-        with:        
+        with:
           bodyFile: "RELEASE_TEMPLATE.md"
           commit: ${{ env.GITHUB_SHA }}
           tag: ${{ env.PINNED_MAILU_VERSION }}
@@ -600,4 +607,3 @@ jobs:
     steps:
       - name: CI/CD succeeded.
         run: exit 0
-

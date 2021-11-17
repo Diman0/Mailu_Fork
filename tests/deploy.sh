@@ -51,4 +51,3 @@ docker-compose -f tests/build.yml push
 
 #MAILU_VERSION: ${{ env.MAILU_VERSION }} will be master or x.y
 #PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }} will be commit hash or x.y.z
-

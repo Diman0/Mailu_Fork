@@ -1,10 +1,9 @@
 ARG DISTRO=alpine:3.14.2
-ARG VERSION=$MAILU_VERSION
 FROM $DISTRO
-
+ARG VERSION
 ENV TZ Etc/UTC
 
-LABEL VERSION=$VERSION
+LABEL version=$VERSION
 RUN echo $VERSION >> /version
 
 # python3 shared with most images

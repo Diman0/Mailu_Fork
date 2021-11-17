@@ -1,17 +1,16 @@
 # NOTE: only add file if building for arm
 ARG ARCH=""
 ARG QEMU=other
-ARG VERSION=$MAILU_VERSION
 FROM ${ARCH}php:7.4-apache as build_arm
 ONBUILD COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 FROM ${ARCH}php:7.4-apache as build_other
 
 FROM build_${QEMU}
-
+ARG VERSION
 ENV TZ Etc/UTC
 
-LABEL VERSION=$VERSION
+LABEL version=$VERSION
 RUN echo $VERSION >> /version
 
 #Shared layer between rainloop and roundcube

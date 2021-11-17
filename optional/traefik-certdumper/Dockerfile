@@ -1,9 +1,9 @@
 FROM ldez/traefik-certs-dumper
-ARG VERSION=$MAILU_VERSION
+ARG VERSION
 
 ENV TZ Etc/UTC
 
-LABEL VERSION=$VERSION
+LABEL version=$VERSION
 RUN echo $VERSION >> /version
 
 RUN apk --no-cache add inotify-tools util-linux bash tzdata

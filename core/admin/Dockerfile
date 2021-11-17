@@ -1,7 +1,6 @@
 # First stage to build assets
 ARG DISTRO=alpine:3.14.2
 ARG ARCH=""
-ARG VERSION=$MAILU_VERSION
 
 FROM ${ARCH}node:16 as assets
 
@@ -22,11 +21,12 @@ RUN set -eu \
 
 # Actual application
 FROM $DISTRO
+ARG VERSION
 COPY --from=balenalib/rpi-alpine:3.14 /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 
 ENV TZ Etc/UTC
 
-LABEL VERSION=$VERSION
+LABEL version=$VERSION
 RUN echo $VERSION >> /version
 
 # python3 shared with most images
