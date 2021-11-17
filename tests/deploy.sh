@@ -31,23 +31,22 @@ then
 fi
 
 #Deploy for master. For master we only publish images with tag master
+#Images are built with tag PINNED_MAILU_VERSION (commit hash).
+#We are tagging them as well with MAILU_VERSION (master)
+#Then we publish the images with tag master
 if [ "$PINNED_MAILU_VERSION" != "" ] && [ "$BRANCH" == "master" ]
 then
-#Images are built with PINNED_MAILU_VERSION.
-#We are tagging them as well with MAILU_VERSION
-#Get all images
   images=$(docker-compose -f tests/build.yml config | grep 'image: ' | awk -F ':' '{ print $2 }')
   for image in $images
   do
     docker tag "${image}":"${PINNED_MAILU_VERSION}" "${image}":${MAILU_VERSION}
   done
 #Push MAILU_VERSION images
+  PINNED_MAILU_VERSION=$MAILU_VERSION
   docker-compose -f tests/build.yml push
   exit 0
 fi
 
-#Fallback in case $PINNED_MAILU_VERSION is empty.
+#Fallback in case $PINNED_MAILU_VERSION is empty. This should never execute.
 docker-compose -f tests/build.yml push
 
-#MAILU_VERSION: ${{ env.MAILU_VERSION }} will be master or x.y
-#PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }} will be commit hash or x.y.z
