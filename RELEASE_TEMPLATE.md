@@ -5,4 +5,6 @@ The pinned version X.Y.Z (e.g. 1.8.1) is not updated. It is pinned to the commit
 To check what was changed:
 - Go to https://github.com/Mailu/Mailu/tree/master/towncrier/newsfragments
 - Change the branch to the tag of this release.
-- Read the news fragment files to check what was changed. 
+- Read the news fragment files to check what was changed.
+
+The release notes of the original release can be accessed via menu item 'Release notes' on [mailu.io](https://mailu.io/).
