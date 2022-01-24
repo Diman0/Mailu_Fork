@@ -28,7 +28,7 @@ on:
 ################################################
 # Code block that is used as one liner.
 ##!/bin/bash
-#version=$( git tag --list "{{ env.MAILU_VERSION }}.*" | tail -1  )
+#version=$( git tag --sort=version:refname --list "{{ env.MAILU_VERSION }}.*" | tail -1  )   )
 #root_version=${version%.*}
 #patch_version=${version##*.}
 #if [ "$patch_version" == "" ]
@@ -75,7 +75,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -151,7 +151,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -223,7 +223,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -295,7 +295,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -367,7 +367,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -439,7 +439,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -511,7 +511,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -589,7 +589,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
         if: ${{ env.BRANCH == 'staging' }}
         shell: bash
@@ -651,13 +651,17 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' }}
         shell: bash
         run: |
-          version=$( git tag --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
+      - name: Tag current commit
+        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
+        shell: bash
+        run: |
+          git tag ${{ env.PINNED_MAILU_VERSION }}
       - name: Tag and create release
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
         uses: ncipollo/release-action@v1
         with:
           bodyFile: "RELEASE_TEMPLATE.md"
-          commit: ${{ env.GITHUB_SHA }}
           tag: ${{ env.PINNED_MAILU_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
