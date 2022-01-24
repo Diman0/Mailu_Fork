@@ -656,7 +656,7 @@ jobs:
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
         shell: bash
         run: |
-          git tag ${{ env.PINNED_MAILU_VERSION }}
+          git tag ${{ env.PINNED_MAILU_VERSION }} ${{ env.GITHUB_SHA }}
       - name: Tag and create release
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
         uses: ncipollo/release-action@v1
