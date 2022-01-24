@@ -123,18 +123,9 @@ services:
     env_file: {{ env }}
     volumes:
       - "{{ root }}/webmail:/data"
+      - "{{ root }}/overrides/{{ webmail_type }}:/overrides:ro"
     deploy:
       replicas: 1
-    healthcheck:
-      disable: true
-  {% endif %}
-
-  {% if db_flavor == 'postgresql' and postgresql == 'internal' %}
-  database:
-    image: ${DOCKER_ORG:-mailu}/postgresql:${MAILU_VERSION:-{{ version }}}
-    env_file: {{ env }}
-    volumes:
-      - "{{ root }}/data/psql_backup:/backup"
     healthcheck:
       disable: true
   {% endif %}

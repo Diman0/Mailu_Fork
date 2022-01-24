@@ -42,10 +42,13 @@ def is_valid_postconf_line(line):
             and not line == ''
 
 # Actual startup script
+os.environ['DEFER_ON_TLS_ERROR'] = os.environ['DEFER_ON_TLS_ERROR'] if 'DEFER_ON_TLS_ERROR' in os.environ else 'True'
 os.environ["FRONT_ADDRESS"] = system.get_host_address_from_environment("FRONT", "front")
 os.environ["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
 os.environ["ANTISPAM_MILTER_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_MILTER", "antispam:11332")
 os.environ["LMTP_ADDRESS"] = system.get_host_address_from_environment("LMTP", "imap:2525")
+os.environ["POSTFIX_LOG_SYSLOG"] = os.environ.get("POSTFIX_LOG_SYSLOG","local")
+os.environ["POSTFIX_LOG_FILE"] = os.environ.get("POSTFIX_LOG_FILE", "")
 
 for postfix_file in glob.glob("/conf/*.cf"):
     conf.jinja(postfix_file, os.environ, os.path.join("/etc/postfix", os.path.basename(postfix_file)))
@@ -79,6 +82,16 @@ if "RELAYUSER" in os.environ:
     path = "/etc/postfix/sasl_passwd"
     conf.jinja("/conf/sasl_passwd", os.environ, path)
     os.system("postmap {}".format(path))
+
+# Configure and start local rsyslog server
+conf.jinja("/conf/rsyslog.conf", os.environ, "/etc/rsyslog.conf")
+os.system("/usr/sbin/rsyslogd -n &")
+# Configure logrotate and start crond
+if os.environ["POSTFIX_LOG_FILE"] != "":
+    conf.jinja("/conf/logrotate.conf", os.environ, "/etc/logrotate.d/postfix.conf")
+    os.system("/usr/sbin/crond")
+    if os.path.exists("/overrides/logrotate.conf"):
+        shutil.copyfile("/overrides/logrotate.conf", "/etc/logrotate.d/postfix.conf")
 
 # Run Podop and Postfix
 multiprocessing.Process(target=start_podop).start()

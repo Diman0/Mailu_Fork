@@ -124,12 +124,12 @@ Full-text search is enabled for IMAP is enabled by default. This feature can be 
 Web settings
 ------------
 
-- ``WEB_ADMIN`` contains the path to the main admin interface 
+- ``WEB_ADMIN`` contains the path to the main admin interface
 
 - ``WEB_WEBMAIL`` contains the path to the Web email client.
 
 - ``WEBROOT_REDIRECT`` redirects all non-found queries to the set path.
-  An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic behavior of a 404 result when not found. 
+  An empty ``WEBROOT_REDIRECT`` value disables redirecting and enables classic behavior of a 404 result when not found.
   Alternatively, ``WEBROOT_REDIRECT`` can be set to ``none`` if you are using an Nginx override for ``location /``.
 
 All three options need a leading slash (``/``) to work.
@@ -181,7 +181,7 @@ The ``CREDENTIAL_ROUNDS`` (default: 12) setting is the number of rounds used by 
 
 The ``SESSION_COOKIE_SECURE`` (default: True) setting controls the secure flag on the cookies of the administrative interface. It should only be turned off if you intend to access it over plain HTTP.
 
-``SESSION_LIFETIME`` (default: 24) is the length in hours a session is valid for on the administrative interface.
+``SESSION_TIMEOUT`` (default: 3600) is the maximum amount of time in seconds between requests before a session is invalidated. ``PERMANENT_SESSION_LIFETIME`` (default: 108000) is the maximum amount of time in seconds a session can be kept alive for if it hasn't timed-out.
 
 The ``LOG_LEVEL`` setting is used by the python start-up scripts as a logging threshold.
 Log messages equal or higher than this priority will be printed.
@@ -239,6 +239,8 @@ resolved. This can be used to rely on DNS based service discovery with changing 
 When using ``*_ADDRESS``, the hostnames must be full-qualified hostnames. Otherwise nginx will not be able to
 resolve the hostnames.
 
+.. _db_settings:
+
 Database settings
 -----------------
 
@@ -260,3 +262,61 @@ The roundcube service stores configurations in a database.
 - ``ROUNDCUBE_DB_PW``: the database password for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_USER``: the database user for roundcube service. (when not ``sqlite``)
 - ``ROUNDCUBE_DB_NAME``: the database name for roundcube service. (when not ``sqlite``)
+
+Webmail settings
+----------------
+
+When using roundcube it is possible to select the plugins to be enabled by setting ``ROUNDCUBE_PLUGINS`` to
+a comma separated list of plugin-names. Included plugins are:
+
+- acl (needs configuration)
+- additional_message_headers (needs configuration)
+- archive
+- attachment_reminder
+- carddav
+- database_attachmentsi
+- debug_logger
+- emoticons
+- enigma
+- help
+- hide_blockquote
+- identicon
+- identity_select
+- jqueryui
+- mailu
+- managesieve
+- markasjunk
+- new_user_dialog
+- newmail_notifier
+- reconnect
+- show_additional_headers (needs configuration)
+- subscriptions_option
+- vcard_attachments
+- zipdownload
+
+If ``ROUNDCUBE_PLUGINS`` is not set the following plugins are enabled by default:
+
+- archive
+- carddav
+- enigma
+- mailu
+- managesieve
+- markasjunk
+- zipdownload
+
+To disable all plugins just set ``ROUNDCUBE_PLUGINS`` to ``mailu``.
+
+To configure a plugin add php files named ``*.inc`` to roundcube's :ref:`override section <override-label>`.
+
+Mail log settings
+-----------------
+
+By default, all services log directly to stdout/stderr. Logs can be collected by any docker log processing solution.
+
+Postfix writes the logs to a syslog server which logs to stdout. This is used to filter out messages from the healthcheck.
+In some situations, a separate mail log is required (e.g. for legal reasons). The syslog server can be configured to write log files to a volume. It can be configured with the following option:
+
+- ``POSTFIX_LOG_FILE``: The file to log the mail log to. When enabled, the syslog server will also log to stdout.
+
+When ``POSTFIX_LOG_FILE`` is enabled, the logrotate program will automatically rotate the logs every week and keep 52 logs.
+To override the logrotate configuration, create the file logrotate.conf with the desired configuration in the :ref:`Postfix overrides folder<override-label>`.
