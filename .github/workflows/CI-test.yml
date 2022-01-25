@@ -31,5 +31,6 @@ on: workflow_dispatch
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
         shell: bash
         run: |
+          echo git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git log -1 --format='%H')
           git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git log -1 --format='%H')
-          echo $(/usr/bin/git log -1 --format='%H')
+          
