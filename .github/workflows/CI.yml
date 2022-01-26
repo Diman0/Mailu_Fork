@@ -4,10 +4,8 @@ on:
     branches:
       - staging
       - testing
-      - '1.5'
-      - '1.6'
-      - '1.7'
       - '1.8'
+      - '1.9'
       - master
       # test branches, e.g. test-debian
       - test-*
@@ -28,7 +26,7 @@ concurrency: ci-${{ github.ref }}
 ################################################
 # Code block that is used as one liner.
 ##!/bin/bash
-#version=$( git tag --sort=version:refname --list "{{ env.MAILU_VERSION }}.*" | tail -1  )   )
+#version=$( git tag --sort=version:refname --list "{{ env.MAILU_VERSION }}.*" | tail -1  )
 #root_version=${version%.*}
 #patch_version=${version##*.}
 #if [ "$patch_version" == "" ]
@@ -652,12 +650,12 @@ jobs:
         shell: bash
         run: |
           version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Tag commit of branch x.y.
+      - name: Create tag for branch x.y.
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
-        shell: bash
+        shell: bash     
         run: |
-          echo git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git log -1 --format='%H')
-          git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git log -1 --format='%H')
+          echo git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
+          git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
           git push origin ${{ env.PINNED_MAILU_VERSION }}
       - name: Create release for tag x.y.z.
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' && env.PINNED_MAILU_VERSION != '' }}
