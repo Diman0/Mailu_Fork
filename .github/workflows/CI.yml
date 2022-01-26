@@ -6,6 +6,7 @@ on:
       - testing
       - '1.8'
       - '1.9'
+      - '1.10'
       - master
       # test branches, e.g. test-debian
       - test-*
