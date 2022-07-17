@@ -47,7 +47,7 @@ jobs:
         MAILU_VERSION: ${{ env.MAILU_VERSION }}
         PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
         DOCKER_ORG: ${{ env.DOCKER_ORG }}
-        BRANCH: ${{ env.BRANCH }}    
+        BRANCH: ${{ env.BRANCH }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -100,10 +100,6 @@ jobs:
       - derive-variables
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -121,7 +117,7 @@ jobs:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
       - name: Build all docker images
-        uses: docker/build-push-action@v3
+        uses: docker/bake-action@2
         with:
           files: tests/build.hcl
           push: false
@@ -345,10 +341,6 @@ jobs:
       - test-roundcube
       - test-webdav
     steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -369,7 +361,7 @@ jobs:
           password: ${{ secrets.Docker_Password }}
       - name: Deploy images to docker hub for anything but master.
         if:  ${{ needs.derive-variables.outputs.BRANCH }} != 'master' }}
-        uses: docker/build-push-action@v3
+        uses: docker/bake-action@2
         with:
           files: tests/build.hcl
           push: true
@@ -379,7 +371,7 @@ jobs:
             *.args.DOCKER_ORG=${{ needs.derive-variables.outputs.DOCKER_ORG }}
       - name: Deploy images to docker hub for master. For master we ony push tag master
         if: ${{ needs.derive-variables.outputs.BRANCH }} == 'master' }}
-        uses: docker/build-push-action@v3
+        uses: docker/bake-action@2
         with:
           files: tests/build.hcl
           push: true
@@ -395,10 +387,6 @@ jobs:
       - deploy
       - derive-variables
     steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
       - name: Create tag for branch x.y.
         shell: bash
         run: |
