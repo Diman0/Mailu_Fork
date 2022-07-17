@@ -121,7 +121,7 @@ jobs:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
       - name: Build all docker images
-        uses: docker/bake-action@2.1.0
+        uses: docker/build-push-action@v3
         with:
           files: tests/build.hcl
           push: false
@@ -369,7 +369,7 @@ jobs:
           password: ${{ secrets.Docker_Password }}
       - name: Deploy images to docker hub for anything but master.
         if:  ${{ needs.derive-variables.outputs.BRANCH }} != 'master' }}
-        uses: docker/bake-action@2.1.0
+        uses: docker/build-push-action@v3
         with:
           files: tests/build.hcl
           push: true
@@ -379,7 +379,7 @@ jobs:
             *.args.DOCKER_ORG=${{ needs.derive-variables.outputs.DOCKER_ORG }}
       - name: Deploy images to docker hub for master. For master we ony push tag master
         if: ${{ needs.derive-variables.outputs.BRANCH }} == 'master' }}
-        uses: docker/bake-action@2.1.0
+        uses: docker/build-push-action@v3
         with:
           files: tests/build.hcl
           push: true
