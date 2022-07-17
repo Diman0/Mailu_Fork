@@ -36,7 +36,7 @@ concurrency: ci-${{ github.ref }}
 #echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
 env:
   DOCKER_ORG: diman
-  DOCKER_ORG_TESTS: diman
+  DOCKER_ORG_TEST: diman
 
 jobs:
   derive-variables:
@@ -62,19 +62,16 @@ jobs:
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          DOCKER_ORG_TESTS: ${{ env.DOCKER_ORG_TESTS }}
         run: |
           echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG_TEST }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
         if: ${{ env.BRANCH != 'testing' }}
         shell: bash
-        env:
-          DOCKER_ORG: ${{ env.DOCKER_ORG }}
         run: |
           echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for normal release x.y
         if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' }}
         shell: bash
