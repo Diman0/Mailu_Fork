@@ -43,6 +43,11 @@ jobs:
   derive-variables:
     name: derive variables
     runs-on: ubuntu-latest
+    outputs:
+        MAILU_VERSION: ${{ env.MAILU_VERSION }}
+        PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
+        DOCKER_ORG: ${{ env.DOCKER_ORG }}
+        BRANCH: ${{ env.BRANCH }}    
     steps:
       - uses: actions/checkout@v3
         with:
@@ -88,11 +93,6 @@ jobs:
           GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
-      outputs:
-          MAILU_VERSION: ${{ env.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ env.DOCKER_ORG }}
-          BRANCH: ${{ env.BRANCH }}
 
   build:
     name: Build images
@@ -143,7 +143,7 @@ jobs:
         with:
           # fetch-depth 0 is required to also retrieve all tags.
           fetch-depth: 0
-       - name: Create folder for storing images
+      - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
           sudo chmod 777 /images
