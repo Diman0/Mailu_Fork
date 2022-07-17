@@ -46,7 +46,6 @@ jobs:
     outputs:
         MAILU_VERSION: ${{ env.MAILU_VERSION }}
         PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
-        DOCKER_ORG: ${{ env.DOCKER_ORG }}
         BRANCH: ${{ env.BRANCH }}
     steps:
       - uses: actions/checkout@v3
@@ -100,6 +99,18 @@ jobs:
       - derive-variables
     runs-on: ubuntu-latest
     steps:
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - uses: actions/checkout@v3
       - name: Create folder for storing images
         run: |
@@ -125,9 +136,9 @@ jobs:
           set: |
             *.args.MAILU_VERSION=${{ needs.derive-variables.outputs.MAILU_VERSION }}
             *.args.PINNED_MAILU_VERSION=${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-            *.args.DOCKER_ORG=${{ needs.derive-variables.outputs.DOCKER_ORG }}
+            *.args.DOCKER_ORG=${{ env.DOCKER_ORG }}
       - name: Save all docker images
-        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/none ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+        run: docker save ${{ env.DOCKER_ORG }}/admin ${{ env.DOCKER_ORG }}/clamav ${{ env.DOCKER_ORG }}/docs ${{ env.DOCKER_ORG }}/dovecot ${{ env.DOCKER_ORG }}/fetchmail ${{ env.DOCKER_ORG }}/nginx ${{ env.DOCKER_ORG }}/none ${{ env.DOCKER_ORG }}/postfix ${{ env.DOCKER_ORG }}/radicale ${{ env.DOCKER_ORG }}/rainloop ${{ env.DOCKER_ORG }}/roundcube ${{ env.DOCKER_ORG }}/rspamd ${{ env.DOCKER_ORG }}/setup ${{ env.DOCKER_ORG }}/traefik-certdumper ${{ env.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
   test-core:
     name: Perform core tests
@@ -136,6 +147,18 @@ jobs:
       - build
       - derive-variables
     steps:
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           # fetch-depth 0 is required to also retrieve all tags.
@@ -160,7 +183,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-fetchmail:
     name: Perform fetchmail tests
@@ -169,6 +192,18 @@ jobs:
       - build
       - derive-variables
     steps:
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           # fetch-depth 0 is required to also retrieve all tags.
@@ -193,7 +228,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-filters:
     name: Perform filter tests
@@ -202,6 +237,18 @@ jobs:
       - build
       - derive-variables
     steps:
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           # fetch-depth 0 is required to also retrieve all tags.
@@ -226,7 +273,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-rainloop:
     name: Perform rainloop tests
@@ -235,6 +282,18 @@ jobs:
       - build
       - derive-variables
     steps:
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           # fetch-depth 0 is required to also retrieve all tags.
@@ -259,7 +318,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-roundcube:
     name: Perform roundcube tests
@@ -272,6 +331,18 @@ jobs:
         with:
           # fetch-depth 0 is required to also retrieve all tags.
           fetch-depth: 0
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -292,7 +363,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   test-webdav:
     name: Perform webdav tests
@@ -301,6 +372,18 @@ jobs:
       - build
       - derive-variables
     steps:
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           # fetch-depth 0 is required to also retrieve all tags.
@@ -325,7 +408,7 @@ jobs:
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          DOCKER_ORG: ${{ env.DOCKER_ORG }}
 
   deploy:
     name: Deploy images
@@ -342,6 +425,18 @@ jobs:
       - test-roundcube
       - test-webdav
     steps:
+      - name: Derive DOCKER_ORG for testing
+        env:
+          DOCKER_ORG_TESTS: ${{ secrets.DOCKER_ORG_TESTS }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG_TESTS" >> $GITHUB_ENV
+      - name: Derive DOCKER_ORG for other branches
+        env:
+          DOCKER_ORG: ${{ secrets.DOCKER_ORG }}
+        if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing'
+        run: |
+          echo "DOCKER_ORG=$DOCKER_ORG" >> $GITHUB_ENV
       - uses: actions/checkout@v3
       - name: Create folder for storing images
         run: |
@@ -370,7 +465,7 @@ jobs:
           set: |
             *.args.MAILU_VERSION=${{ needs.derive-variables.outputs.MAILU_VERSION }}
             *.args.PINNED_MAILU_VERSION=${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-            *.args.DOCKER_ORG=${{ needs.derive-variables.outputs.DOCKER_ORG }}
+            *.args.DOCKER_ORG=${{ env.DOCKER_ORG }}
       - name: Deploy images to docker hub for master. For master we ony push tag master
         if: ${{ needs.derive-variables.outputs.BRANCH }} == 'master' }}
         uses: docker/bake-action@v2
@@ -380,7 +475,7 @@ jobs:
           set: |
             *.args.MAILU_VERSION=${{ needs.derive-variables.outputs.MAILU_VERSION }}
             *.args.PINNED_MAILU_VERSION=${{ needs.derive-variables.outputs.MAILU_VERSION }}
-            *.args.DOCKER_ORG=${{ needs.derive-variables.outputs.DOCKER_ORG }}
+            *.args.DOCKER_ORG=${{ env.DOCKER_ORG }}
 
   tag-release:
     if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing' && ${{ needs.derive-variables.outputs.BRANCH }} != 'staging' && ${{ needs.derive-variables.outputs.BRANCH }} != 'master' }}
