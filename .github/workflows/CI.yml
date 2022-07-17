@@ -117,6 +117,7 @@ jobs:
         uses: docker/bake-action@v2
         with:
           files: tests/build.hcl
+          load: true
           push: false
           set: |
             *.args.MAILU_VERSION=${{ needs.derive-variables.outputs.MAILU_VERSION }}
