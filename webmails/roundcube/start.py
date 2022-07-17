@@ -51,7 +51,7 @@ context['SECRET_KEY'] = hmac.new(bytearray(secret_key, 'utf-8'), bytearray('ROUN
 
 # roundcube plugins
 # (using "dict" because it is ordered and "set" is not)
-plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/plugins", p)))
+plugins = dict((p, None) for p in env.get("ROUNDCUBE_PLUGINS", "").replace(" ", "").split(",") if p and os.path.isdir(os.path.join("/var/www/html/plugins", p)))
 if plugins:
     plugins["mailu"] = None
 else:
@@ -63,8 +63,7 @@ context["PLUGINS"] = ",".join(f"'{p}'" for p in plugins)
 context["INCLUDES"] = sorted(inc for inc in os.listdir("/overrides") if inc.endswith(".inc")) if os.path.isdir("/overrides") else []
 
 # calculate variables for config file
-env["SESSION_TIMEOUT_MINUTES"] = str(int(env.get("SESSION_TIMEOUT", "3600")) // 60 ) if int(env.get("SESSION_TIMEOUT", "3600")) >= 60 else "1"
-context.update(env)
+context["SESSION_TIMEOUT_MINUTES"] = max(int(env.get("SESSION_TIMEOUT", "3600")) // 60, 1)
 
 # create config files
 conf.jinja("/php.ini", context, "/usr/local/etc/php/conf.d/roundcube.ini")
@@ -72,6 +71,9 @@ conf.jinja("/config.inc.php", context, "/var/www/html/config/config.inc.php")
 
 # create dirs
 os.system("mkdir -p /data/gpg")
+
+# disable access log for VirtualHosts that don't define their own logfile
+os.system("a2disconf other-vhosts-access-log")
 
 print("Initializing database")
 try:

@@ -5,6 +5,7 @@ from flask import current_app as app
 import flask
 import flask_login
 import base64
+import sqlalchemy.exc
 
 @internal.route("/auth/email")
 def nginx_authentication():
@@ -12,13 +13,14 @@ def nginx_authentication():
     """
     client_ip = flask.request.headers["Client-Ip"]
     headers = flask.request.headers
-    if headers["Auth-Port"] == '25' and headers['Auth-Method'] == 'plain':
+    if headers["Auth-Port"] == '25' and headers['Auth-Method'] != 'none':
         response = flask.Response()
         response.headers['Auth-Status'] = 'AUTH not supported'
         response.headers['Auth-Error-Code'] = '502 5.5.1'
         utils.limiter.rate_limit_ip(client_ip)
         return response
-    if utils.limiter.should_rate_limit_ip(client_ip):
+    is_from_webmail = headers['Auth-Port'] in ['10143', '10025']
+    if not is_from_webmail and utils.limiter.should_rate_limit_ip(client_ip):
         status, code = nginx.get_status(flask.request.headers['Auth-Protocol'], 'ratelimit')
         response = flask.Response()
         response.headers['Auth-Status'] = status
@@ -31,7 +33,7 @@ def nginx_authentication():
     for key, value in headers.items():
         response.headers[key] = str(value)
     is_valid_user = False
-    if response.headers.get("Auth-User-Exists"):
+    if response.headers.get("Auth-User-Exists") == "True":
         username = response.headers["Auth-User"]
         if utils.limiter.should_rate_limit_user(username, client_ip):
             # FIXME could be done before handle_authentication()
@@ -47,7 +49,7 @@ def nginx_authentication():
         utils.limiter.exempt_ip_from_ratelimits(client_ip)
     elif is_valid_user:
         utils.limiter.rate_limit_user(username, client_ip)
-    else:
+    elif not is_from_webmail:
         utils.limiter.rate_limit_ip(client_ip)
     return response
 
@@ -95,13 +97,19 @@ def basic_authentication():
             response.headers["WWW-Authenticate"] = 'Basic realm="Authentication rate limit for this username exceeded"'
             response.headers['Retry-After'] = '60'
             return response
-        user = models.User.query.get(user_email)
-        if user and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web"):
-            response = flask.Response()
-            response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
-            utils.limiter.exempt_ip_from_ratelimits(client_ip)
-            return response
-        utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip)
+        try:
+            user = models.User.query.get(user_email) if '@' in user_email else None
+        except sqlalchemy.exc.StatementError as exc:
+            exc = str(exc).split('\n', 1)[0]
+            app.logger.warn(f'Invalid user {user_email!r}: {exc}')
+        else:
+            if user is not None and nginx.check_credentials(user, password.decode('utf-8'), client_ip, "web"):
+                response = flask.Response()
+                response.headers["X-User"] = models.IdnaEmail.process_bind_param(flask_login, user.email, "")
+                utils.limiter.exempt_ip_from_ratelimits(client_ip)
+                return response
+            # We failed check_credentials
+            utils.limiter.rate_limit_user(user_email, client_ip) if user else utils.limiter.rate_limit_ip(client_ip)
     response = flask.Response(status=401)
     response.headers["WWW-Authenticate"] = 'Basic realm="Login Required"'
     return response

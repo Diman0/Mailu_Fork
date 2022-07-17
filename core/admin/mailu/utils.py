@@ -47,16 +47,15 @@ def handle_needs_login():
 
 # DNS stub configured to do DNSSEC enabled queries
 resolver = dns.resolver.Resolver()
-resolver.use_edns(0, 0, 1232)
+resolver.use_edns(0, dns.flags.DO, 1232)
 resolver.flags = dns.flags.AD | dns.flags.RD
 
 def has_dane_record(domain, timeout=10):
     try:
-        result = resolver.query(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
+        result = resolver.resolve(f'_25._tcp.{domain}', dns.rdatatype.TLSA,dns.rdataclass.IN, lifetime=timeout)
         if result.response.flags & dns.flags.AD:
             for record in result:
                 if isinstance(record, dns.rdtypes.ANY.TLSA.TLSA):
-                    record.validate()
                     if record.usage in [2,3] and record.selector in [0,1] and record.mtype in [0,1,2]:
                         return True
     except dns.resolver.NoNameservers:
@@ -79,9 +78,9 @@ limiter = limiter.LimitWraperFactory()
 def extract_network_from_ip(ip):
     n = ipaddress.ip_network(ip)
     if n.version == 4:
-        return str(n.supernet(prefixlen_diff=(32-int(app.config["AUTH_RATELIMIT_IP_V4_MASK"]))).network_address)
+        return str(n.supernet(prefixlen_diff=(32-app.config["AUTH_RATELIMIT_IP_V4_MASK"])).network_address)
     else:
-        return str(n.supernet(prefixlen_diff=(128-int(app.config["AUTH_RATELIMIT_IP_V6_MASK"]))).network_address)
+        return str(n.supernet(prefixlen_diff=(128-app.config["AUTH_RATELIMIT_IP_V6_MASK"])).network_address)
 
 def is_exempt_from_ratelimits(ip):
     ip = ipaddress.ip_address(ip)
@@ -231,8 +230,6 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def destroy(self):
         """ destroy session for security reasons. """
-        if 'webmail_token' in self:
-            self.app.session_store.delete(self['webmail_token'])
         self.delete()
 
         self._uid = None
@@ -246,13 +243,15 @@ class MailuSession(CallbackDict, SessionMixin):
 
     def regenerate(self):
         """ generate new id for session to avoid `session fixation`. """
-        self.delete()
+        self.delete(clear_token=False)
         self._sid = None
         self.modified = True
 
-    def delete(self):
+    def delete(self, clear_token=True):
         """ Delete stored session. """
         if self.saved:
+            if clear_token and 'webmail_token' in self:
+                self.app.session_store.delete(self['webmail_token'])
             self.app.session_store.delete(self._key)
             self._key = None
 
@@ -268,9 +267,9 @@ class MailuSession(CallbackDict, SessionMixin):
             self._sid = self.app.session_config.gen_sid()
             set_cookie = True
             if 'webmail_token' in self:
-                app.session_store.put(self['webmail_token'],
+                self.app.session_store.put(self['webmail_token'],
                         self.sid,
-                        int(app.config['PERMANENT_SESSION_LIFETIME']),
+                        self.app.config['PERMANENT_SESSION_LIFETIME'],
                 )
 
         # get new session key
@@ -284,7 +283,7 @@ class MailuSession(CallbackDict, SessionMixin):
         self.app.session_store.put(
             key,
             pickle.dumps(dict(self)),
-            int(app.config['SESSION_TIMEOUT']),
+            app.config['SESSION_TIMEOUT'],
         )
 
         self._key = key
@@ -300,7 +299,7 @@ class MailuSessionConfig:
     # default size of session key parts
     uid_bits = 64 # default if SESSION_KEY_BITS is not set in config
     sid_bits = 128 # for now. must be multiple of 8!
-    time_bits = 32 # for now. must be multiple of 8!
+    time_bits = 32 # for now. must be multiple of 8!  
 
     def __init__(self, app=None):
 
@@ -341,6 +340,9 @@ class MailuSessionConfig:
     def parse_key(self, key, app=None, now=None):
         """ Split key into sid, uid and creation time. """
 
+        if app is None:
+            app = flask.current_app
+
         if not (isinstance(key, bytes) and self._key_min <= len(key) <= self._key_max):
             return None
 
@@ -357,7 +359,7 @@ class MailuSessionConfig:
         if now is None:
             now = int(time.time())
         created = int.from_bytes(created, byteorder='big')
-        if not created <= now <= created + int(app.config['PERMANENT_SESSION_LIFETIME']):
+        if not created <= now <= created + app.config['PERMANENT_SESSION_LIFETIME']:
             return None
 
         return (uid, sid, crt)
@@ -402,7 +404,7 @@ class MailuSessionInterface(SessionInterface):
             response.set_cookie(
                 app.session_cookie_name,
                 session.sid,
-                expires=datetime.now()+timedelta(seconds=int(app.config['PERMANENT_SESSION_LIFETIME'])),
+                expires=datetime.now()+timedelta(seconds=app.config['PERMANENT_SESSION_LIFETIME']),
                 httponly=self.get_cookie_httponly(app),
                 domain=self.get_cookie_domain(app),
                 path=self.get_cookie_path(app),
@@ -422,7 +424,16 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list():
-            if not app.session_config.parse_key(key, app, now=now):
+            if key.startswith(b'token-'):
+                if sessid := app.session_store.get(key):
+                    if not app.session_config.parse_key(sessid, app, now=now):
+                        app.session_store.delete(sessid)
+                        app.session_store.delete(key)
+                        count += 1
+                else:
+                    app.session_store.delete(key)
+                    count += 1
+            elif not app.session_config.parse_key(key, app, now=now):
                 app.session_store.delete(key)
                 count += 1
 
@@ -442,7 +453,7 @@ class MailuSessionExtension:
 
         count = 0
         for key in app.session_store.list(prefix):
-            if key not in keep:
+            if key not in keep and not key.startswith(b'token-'):
                 app.session_store.delete(key)
                 count += 1
 
@@ -481,8 +492,7 @@ session = MailuSessionExtension()
 def verify_temp_token(email, token):
     try:
         if token.startswith('token-'):
-            sessid = app.session_store.get(token)
-            if sessid:
+            if sessid := app.session_store.get(token):
                 session = MailuSession(sessid, app)
                 if session.get('_user_id', '') == email:
                     return True
@@ -494,6 +504,6 @@ def gen_temp_token(email, session):
     session['webmail_token'] = token
     app.session_store.put(token,
             session.sid,
-            int(app.config['PERMANENT_SESSION_LIFETIME']),
+            app.config['PERMANENT_SESSION_LIFETIME'],
     )
     return token

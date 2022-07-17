@@ -267,6 +267,7 @@ correct syntax. The following file names will be taken as override configuration
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
+- Roundcube - All ``*.inc`` files in the ``roundcube`` sub directory.
 
 To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
 
@@ -395,58 +396,6 @@ Mailu can serve an `MTA-STS policy`_; To configure it you will need to:
 .. _`1798`: https://github.com/Mailu/Mailu/issues/1798
 .. _`MTA-STS policy`: https://datatracker.ietf.org/doc/html/rfc8461
 
-How do I setup client autoconfiguration?
-````````````````````````````````````````
-
-Mailu can serve an `XML file for autoconfiguration`_; To configure it you will need to:
-
-1. add ``autoconfig.example.com`` to the ``HOSTNAMES`` configuration variable (and ensure that a valid SSL certificate is available for it; this may mean restarting your smtp container)
-
-2. configure an override with the policy itself; for example, your ``overrides/nginx/autoconfiguration.conf`` could read:
-
-.. code-block:: bash
-
-   location ^~ /mail/config-v1.1.xml {
-   return 200 "<?xml version=\"1.0\"?>
-   <clientConfig version=\"1.1\">
-   <emailProvider id=\"%EMAILDOMAIN%\">
-   <domain>%EMAILDOMAIN%</domain>
-
-   <displayName>Email</displayName>
-   <displayShortName>Email</displayShortName>
-
-   <incomingServer type=\"imap\">
-   <hostname>mailu.example.com</hostname>
-   <port>993</port>
-   <socketType>SSL</socketType>
-   <username>%EMAILADDRESS%</username>
-   <authentication>password-cleartext</authentication>
-   </incomingServer>
-
-   <outgoingServer type=\"smtp\">
-   <hostname>mailu.example.com</hostname>
-   <port>465</port>
-   <socketType>SSL</socketType>
-   <username>%EMAILADDRESS%</username>
-   <authentication>password-cleartext</authentication>
-   <addThisServer>true</addThisServer>
-   <useGlobalPreferredServer>true</useGlobalPreferredServer>
-   </outgoingServer>
-
-   <documentation url=\"https://mailu.example.com/admin/ui/client\">
-   <descr lang=\"en\">Configure your email client</descr>
-   </documentation>
-   </emailProvider>
-   </clientConfig>\r\n";
-   }
-
-3. setup the appropriate DNS/CNAME record (``autoconfig.example.com`` -> ``mailu.example.com``).
-
-*issue reference:* `224`_.
-
-.. _`224`: https://github.com/Mailu/Mailu/issues/224
-.. _`XML file for autoconfiguration`: https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
-
 Technical issues
 ----------------
 
@@ -475,6 +424,22 @@ Any mail related connection is proxied by nginx. Therefore the SMTP Banner is al
 
 .. _`1368`: https://github.com/Mailu/Mailu/issues/1368
 
+My emails are getting rejected, I am being told to slow down, what can I do?
+````````````````````````````````````````````````````````````````````````````
+
+Some email operators insist that emails are delivered slowly. Mailu maintains two separate queues for such destinations: ``polite`` and ``turtle``. To enable them for some destination you can creating an override at ``overrides/postfix/transport.map`` as follow:
+
+.. code-block:: bash
+
+   yahoo.com   polite:
+   orange.fr   turtle:
+
+Re-starting the smtp container will be required for changes to take effect.
+
+*Issue reference:* `2213`_.
+
+.. _`2213`: https://github.com/Mailu/Mailu/issues/2213
+
 My emails are getting defered, what can I do?
 `````````````````````````````````````````````
 
@@ -487,12 +452,12 @@ If delivery to a specific domain fails because their DANE records are invalid or
    domain.example.com   may
    domain.example.org   encrypt
 
-The syntax and options are as described in `postfix's documentation`_. Re-creating the smtp container will be required for changes to take effect.
+The syntax and options are as described in `postfix's documentation`_. Re-starting the smtp container will be required for changes to take effect.
 
 .. _`postfix's documentation`: http://www.postfix.org/postconf.5.html#smtp_tls_policy_maps
 
 403 - Access Denied Errors
----------------------------
+``````````````````````````
 
 While this may be due to several issues, check to make sure your ``DOMAIN=`` entry is the **first** entry in your ``HOSTNAMES=``.
 
@@ -510,7 +475,7 @@ These issues are typically caused by four scenarios:
 #. Certificates expired;
 #. When ``TLS_FLAVOR=letsencrypt``, it might be that the *certbot* script is not capable of
    obtaining the certificates for your domain. See `letsencrypt issues`_
-#. When ``TLS_FLAVOR=certs``, certificates are supposed to be copied to ``/mailu/certs``.
+#. When ``TLS_FLAVOR=cert``, certificates are supposed to be copied to ``/mailu/certs``.
    Using an external ``letsencrypt`` program, it tends to happen people copy the whole
    ``letsencrypt/live`` directory containing symlinks. Symlinks do not resolve inside the
    container and therefore it breaks the TLS implementation.
@@ -570,24 +535,32 @@ This will generate the DKIM and DMARC entries for you.
 
 *Issue reference:* `102`_.
 
+.. _Fail2Ban:
+
 Do you support Fail2Ban?
 ````````````````````````
 
 Fail2Ban is not included in Mailu. Fail2Ban needs to modify the host's IP tables in order to
 ban the addresses. We consider such a program should be run on the host system and not
 inside a container. The ``front`` container does use authentication rate limiting to slow
-down brute force attacks.
+down brute force attacks. The same applies to login attempts via the single sign on page.
 
-We *do* provide a possibility to export the logs from the ``front`` service to the host.
+We *do* provide a possibility to export the logs from the ``front`` service and ``Admin`` service to the host.
+The ``front`` container logs failed logon attempts on SMTP, IMAP and POP3. 
+The ``Admin``container logs failed logon attempt on the single sign on page.
 For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
 manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
-Below an example how to do so. Be aware that webmail authentication appears to come from the
-Docker network, so don't ban those addresses!
+Below an example how to do so. 
+
+If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.
+Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned. 
+See the :ref:`[configuration reference <reverse_proxy_headers>` for more information.
+
 
 Assuming you have a working Fail2Ban installation on the host running your Docker containers,
 follow these steps:
 
-1. In the mailu docker-compose set the logging driver of the front container to journald
+1. In the mailu docker-compose set the logging driver of the front container to journald; and set the tag to mailu-front
 
 .. code-block:: bash
 
@@ -621,7 +594,43 @@ follow these steps:
 
 The above will block flagged IPs for a week, you can of course change it to you needs.
 
-4. Add the /etc/fail2ban/action.d/docker-action.conf
+4. In the mailu docker-compose set the logging driver of the Admin container to journald; and set the tag to mailu-admin
+
+.. code-block:: bash
+  
+  logging:
+    driver: journald
+    options:
+      tag: mailu-admin
+
+5. Add the /etc/fail2ban/filter.d/bad-auth-sso.conf
+
+.. code-block:: bash
+
+  # Fail2Ban configuration file
+  [Definition]
+  failregex = .* Login failed for .+ from <HOST>.
+  ignoreregex =
+  journalmatch = CONTAINER_TAG=mailu-admin
+
+6. Add the /etc/fail2ban/jail.d/bad-auth-sso.conf
+
+.. code-block:: bash
+
+  [bad-auth-sso]
+  enabled = true
+  backend = systemd
+  filter = bad-auth-sso
+  bantime = 604800
+  findtime = 300
+  maxretry = 10
+  action = docker-action
+
+The above will block flagged IPs for a week, you can of course change it to you needs.
+
+7. Add the /etc/fail2ban/action.d/docker-action.conf
+  
+Option 1: Use plain iptables
 
 .. code-block:: bash
 
@@ -629,9 +638,9 @@ The above will block flagged IPs for a week, you can of course change it to you 
   
   actionstart = iptables -N f2b-bad-auth
                 iptables -A f2b-bad-auth -j RETURN
-                iptables -I DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+                iptables -I DOCKER-USER -j f2b-bad-auth
   
-  actionstop = iptables -D DOCKER-USER -p tcp -m multiport --dports 1:1024 -j f2b-bad-auth
+  actionstop = iptables -D DOCKER-USER -j f2b-bad-auth
                iptables -F f2b-bad-auth
                iptables -X f2b-bad-auth
   
@@ -643,7 +652,34 @@ The above will block flagged IPs for a week, you can of course change it to you 
 
 Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
 
-5. Configure and restart the Fail2Ban service
+Option 2:  Use ipset together with iptables
+IMPORTANT: You have to install ipset on the host system, eg. `apt-get install ipset` on a Debian/Ubuntu system.
+
+See ipset homepage for details on ipset, https://ipset.netfilter.org/.
+
+ipset and iptables provide one big advantage over just using iptables: This setup reduces the overall iptable rules.
+There is just one rule for the bad authentications and the IPs are within the ipset. 
+Specially in larger setups with a high amount of brute force attacks this comes in handy.
+Using iptables with ipset might reduce the system load in such attacks significantly.
+
+.. code-block:: bash
+
+  [Definition]
+
+  actionstart = actionstart = ipset --create f2b-bad-auth iphash
+                iptables -I DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP
+
+  actionstop = iptables -D DOCKER-USER -m set --match-set f2b-bad-auth src -j DROP
+               ipset --destroy f2b-bad-auth
+
+
+  actionban = ipset add -exist f2b-bad-auth <ip>
+
+  actionunban = ipset del -exist f2b-bad-auth <ip>
+
+Using DOCKER-USER chain ensures that the blocked IPs are processed in the correct order with Docker. See more in: https://docs.docker.com/network/iptables/
+
+1. Configure and restart the Fail2Ban service
 
 Make sure Fail2Ban is started after the Docker service by adding a partial override which appends this to the existing configuration.
 
@@ -792,4 +828,22 @@ iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 25 -j SNAT --to <your mx i
 
 A user gets ``Sender address rejected: Access denied. Please check the`` ``message recipient […] and try again`` even though the sender is legitimate?
 ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
+
 First, check if you are really sure the user is a legitimate sender, i.e. the registered user is authenticated successfully and own either the account or alias he/she is trying to send from. If you are really sure this is correct, then the user might try to errornously send via port 25 insteadof the designated SMTP client-ports. Port 25 is meant for server-to-server delivery, while users should use port 587 or 465.
+
+The admin container won't start and its log says ``Critical: your DNS resolver isn't doing DNSSEC validation``
+``````````````````````````````````````````````````````````````````````````````````````````````````````````````
+Since v1.9, Mailu requires a **validating** DNSSEC enabled DNS resolver. To check whether your DNS resolver (and its upstream) fits the requirements you can use the following command and see whether the **AD** flag is present in the reply:
+
+.. code-block:: bash
+
+  dig @<ip> +adflag example.org A
+
+We recommend that you run your own DNS resolver (enable unbound and update your docker-compose.yml when you update from older versions) instead of relying on publicly available ones. It's better security-wise (you don't have to trust them) and RBLs used by rspamd are known to rate-limit per source-ip address.
+
+We have seen a fair amount of support requests related to the following:
+
+- dnsmasq won't forward DNSSEC results unless instructed to do so. If you are running openwrt or pi-hole, you do need to enable DNSSEC.
+- `coredns has a bug`_ that we have now worked around
+
+.. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
