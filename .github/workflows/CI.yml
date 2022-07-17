@@ -35,8 +35,8 @@ concurrency: ci-${{ github.ref }}
 #fi
 #echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
 env:
-  DOCKER_ORG: mailu
-  DOCKER_ORG_TESTS: mailuci
+  DOCKER_ORG: diman
+  DOCKER_ORG_TESTS: diman
 
 jobs:
   derive-variables:
