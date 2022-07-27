@@ -226,7 +226,6 @@ jobs:
         uses: docker/bake-action@v2
         with:
           files: ${{env.HCL_FILE}}
-          targets: ${{ fromJson(needs.targets.outputs.matrix) }}  
           load: true
           push: false
           set: |
