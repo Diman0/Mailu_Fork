@@ -138,7 +138,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # needed for gha cache?
       - name: setup github runtime
-      - uses: crazy-max/ghaction-github-runtime@v2
+        uses: crazy-max/ghaction-github-runtime@v2
       
       - name: Build all docker images
         env:
