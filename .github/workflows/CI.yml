@@ -58,7 +58,7 @@ jobs:
           echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
         #For branch TESTING, we set the image tag to PR-xxxx
       - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
-        if: ${{ env.BRANCH == 'testing' }}
+        if: env.BRANCH == 'testing'
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -67,23 +67,23 @@ jobs:
           echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
           echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG_TEST }}" >> $GITHUB_ENV
       - name: Derive MAILU_VERSION for other branches than testing
-        if: ${{ env.BRANCH != 'testing' }}
+        if: env.BRANCH != 'testing'
         shell: bash
         run: |
           echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
           echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for normal release x.y
-        if: ${{ env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master' }}
+        if: env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master'
         shell: bash
         run: |
           version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for staging
-        if: ${{ env.BRANCH == 'staging' }}
+        if: env.BRANCH == 'staging'
         shell: bash
         run: |
           echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV
       - name: Derive PINNED_MAILU_VERSION for master
-        if: ${{ env.BRANCH == 'master' }}
+        if: env.BRANCH == 'master'
         shell: bash
         env:
           GITHUB_SHA: ${{ env.GITHUB_SHA }}
@@ -327,7 +327,7 @@ jobs:
   deploy:
     name: Deploy images
     # Deploying is not required for staging
-    if: ${{ needs.derive-variables.outputs.BRANCH }} != 'staging' }}
+    if: needs.derive-variables.outputs.BRANCH != 'staging'
     runs-on: ubuntu-latest
     needs:
       - derive-variables
@@ -359,7 +359,7 @@ jobs:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
       - name: Deploy images to docker hub for anything but master.
-        if:  ${{ needs.derive-variables.outputs.BRANCH }} != 'master' }}
+        if:  needs.derive-variables.outputs.BRANCH != 'master'
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
@@ -369,7 +369,7 @@ jobs:
           files: tests/build.hcl
           push: true
       - name: Deploy images to docker hub for master. For master we ony push tag master
-        if: ${{ needs.derive-variables.outputs.BRANCH }} == 'master' }}
+        if: needs.derive-variables.outputs.BRANCH == 'master'
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
@@ -380,12 +380,16 @@ jobs:
           push: true
 
   tag-release:
-    if: ${{ needs.derive-variables.outputs.BRANCH }} != 'testing' && ${{ needs.derive-variables.outputs.BRANCH }} != 'staging' && ${{ needs.derive-variables.outputs.BRANCH }} != 'master' }}
+    if: needs.derive-variables.outputs.BRANCH != 'testing' && needs.derive-variables.outputs.BRANCH != 'staging' && needs.derive-variables.outputs.BRANCH != 'master'
     runs-on: ubuntu-latest
     needs:
       - deploy
       - derive-variables
     steps:
+      - uses: actions/checkout@v3
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
       - name: Create tag for branch x.y.
         shell: bash
         run: |
@@ -403,7 +407,7 @@ jobs:
   ci-success:
     name: CI-Done
     #Returns true when none of the **previous** steps have failed or have been canceled.
-    if: ${{ success() }}
+    if: success()
     needs:
       - deploy
     runs-on: ubuntu-latest
