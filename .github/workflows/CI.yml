@@ -229,8 +229,7 @@ jobs:
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: setup buildx instance
         run: docker buildx create --use
-      - name: Deploy images to docker hub for anything but master.
-        if:  needs.derive-variables.outputs.BRANCH != 'master'
+      - name: Deploy images to docker hub. Build.hcl contains the logic for the tags that are pushed.
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
@@ -254,33 +253,7 @@ jobs:
             *.cache-from=type=gha,scope=build-resolver
             *.cache-from=type=gha,scope=build-traefik-certdumper
             *.cache-from=type=gha,scope=build-webdav
-            *.platform=linux/amd64 
-      - name: Deploy images to docker hub for master. For master we ony push tag master
-        if: needs.derive-variables.outputs.BRANCH == 'master'
-        env:
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
-          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}        
-        uses: docker/bake-action@v2
-        with:
-          files: ${{env.HCL_FILE}}
-          push: true
-          set: |
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-rainloop
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
-            *.platform=linux/amd64          
+            *.platform=linux/amd64    
             
   tag-release:
     if: needs.derive-variables.outputs.BRANCH != 'testing' && needs.derive-variables.outputs.BRANCH != 'staging' && needs.derive-variables.outputs.BRANCH != 'master'
