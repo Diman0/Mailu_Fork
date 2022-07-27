@@ -122,15 +122,15 @@ jobs:
      packages: write     
     steps:
       - uses: actions/checkout@v3
-#      - name: Create folder for storing images
-#        run: |
-#          sudo mkdir -p /images
-##          sudo chmod 777 /images
- #     - name: Configure images folder for caching
- #       uses: actions/cache@v2
- #       with:
- #         path: /images
- #         key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -138,15 +138,6 @@ jobs:
         with:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}        
-#      - name: Login to ghcr.io
-#        uses: docker/login-action@v2
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-      # needed for gha cache?
-      - name: setup github runtime
-        uses: crazy-max/ghaction-github-runtime@v2
       - name: setup builder instance
         run: docker buildx create --use
       - name: Build all docker images
@@ -161,12 +152,9 @@ jobs:
           load: true
           push: false
           set: |
-            *.cache-from=type=gha,scope=build-${{ env.GITHUB_SHA }}
-            *.cache-to=type=gha,scope=build-${{ env.GITHUB_SHAt }},mode=max
+            *.output=type=docker,dest=/images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
+            *.cache-to=type=local,dest=/images/cache/${{ matrix.target }}
             *.platform=linux/amd64
-#      - name: Save all docker images
-        #run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
-#        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/${{ matrix.target }} -o /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
 
   tests:
     name: tests
@@ -188,50 +176,31 @@ jobs:
             time: "3"        
     steps:
       - uses: actions/checkout@v3
-#      - name: Create folder for storing images
-#        run: |
-#          sudo mkdir -p /images
-#          sudo chmod 777 /images
-#      - name: Configure images folder for caching
-#        uses: actions/cache@v2
- #       with:
- #         path: /images
- #         key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
- #     - name: Load docker images
-#        run: docker load -i /images/images.tar.gz
-  #      run: |
-  #         docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-clamav.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-dovecot.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-nginx.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-postfix.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-radicale.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rspamd.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
-#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-unbound.tar.gz
-      - name: setup github runtime
-        uses: crazy-max/ghaction-github-runtime@v2
-      - name: setup builder instance
-        run: docker buildx create --use
-      - name: Build all docker images
-        env:
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
-          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}       
-        uses: docker/bake-action@v2
+      - name: Create folder for storing images
+        run: |
+          sudo mkdir -p /images
+          sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
         with:
-          files: ${{env.HCL_FILE}}
-          load: true
-          push: false
-          set: |
-            *.cache-from=type=gha,scope=build-${{ env.GITHUB_SHA }}
-            *.cache-to=type=gha,scope=build-${{ env.GITHUB_SHA }},mode=max
-            *.platform=linux/amd64       
+          path: /images
+          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: |
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antispam.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-front.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-imap.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-smtp.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antivirus.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-resolver.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-webdav.tar.gz  
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -258,6 +227,11 @@ jobs:
         run: |
           sudo mkdir -p /images
           sudo chmod 777 /images
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -276,9 +250,21 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=gha,scope=build-${{ env.GITHUB_SHA }}
-            *.cache-to=type=gha,scope=build-${{ env.GITHUB_SHA }},mode=max
-            *.platform=linux/amd64          
+            *.cache-from=type=local,src=/images/cache/docs
+            *.cache-from=type=local,src=/images/cache/setup
+            *.cache-from=type=local,src=/images/cache/admin
+            *.cache-from=type=local,src=/images/cache/antispam
+            *.cache-from=type=local,src=/images/cache/front
+            *.cache-from=type=local,src=/images/cache/imap
+            *.cache-from=type=local,src=/images/cache/smtp
+            *.cache-from=type=local,src=/images/cache/rainloop
+            *.cache-from=type=local,src=/images/cache/roundcube
+            *.cache-from=type=local,src=/images/cache/antivirus
+            *.cache-from=type=local,src=/images/cache/fetchmail
+            *.cache-from=type=local,src=/images/cache/resolver
+            *.cache-from=type=local,src=/images/cache/traefik-certdumper
+            *.cache-from=type=local,src=/images/cache/webdav
+            *.platform=linux/amd64 
       - name: Deploy images to docker hub for master. For master we ony push tag master
         if: needs.derive-variables.outputs.BRANCH == 'master'
         env:
@@ -290,10 +276,23 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=gha,scope=build-${{ env.GITHUB_SHA }}
-            *.cache-to=type=gha,scope=build-${{ env.GITHUB_SHA }},mode=max
+            *.cache-from=type=local,src=/images/cache/docs
+            *.cache-from=type=local,src=/images/cache/setup
+            *.cache-from=type=local,src=/images/cache/admin
+            *.cache-from=type=local,src=/images/cache/antispam
+            *.cache-from=type=local,src=/images/cache/front
+            *.cache-from=type=local,src=/images/cache/imap
+            *.cache-from=type=local,src=/images/cache/smtp
+            *.cache-from=type=local,src=/images/cache/rainloop
+            *.cache-from=type=local,src=/images/cache/roundcube
+            *.cache-from=type=local,src=/images/cache/antivirus
+            *.cache-from=type=local,src=/images/cache/fetchmail
+            *.cache-from=type=local,src=/images/cache/resolver
+            *.cache-from=type=local,src=/images/cache/traefik-certdumper
+            *.cache-from=type=local,src=/images/cache/webdav
+            *.platform=linux/amd64 
             *.platform=linux/amd64          
- 
+            
   tag-release:
     if: needs.derive-variables.outputs.BRANCH != 'testing' && needs.derive-variables.outputs.BRANCH != 'staging' && needs.derive-variables.outputs.BRANCH != 'master'
     runs-on: ubuntu-latest
