@@ -112,6 +112,10 @@ jobs:
     needs:
       - derive-variables
       - targets
+    strategy:
+      fail-fast: false
+      matrix: 
+        target: ${{ fromJson(needs.targets.outputs.matrix) }}      
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -126,11 +130,16 @@ jobs:
           key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
+      - name: Login to ghcr.io
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.Docker_Login }}
-          password: ${{ secrets.Docker_Password }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # needed for gha cache?
+      - name: setup github runtime
+      - uses: crazy-max/ghaction-github-runtime@v2
+      
       - name: Build all docker images
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
@@ -138,11 +147,16 @@ jobs:
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}       
         uses: docker/bake-action@v2
         with:
-          files: tests/build.hcl
+          files: ${{env.HCL_FILE}}
+          targets: ${{ matrix.target }}
           load: true
-          push: false
-      - name: Save all docker images
-        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+          push: true
+          set: |
+            *.cache-from=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
+            *.platform=linux/amd64
+#      - name: Save all docker images
+#        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
   tests:
     name: tests
@@ -165,13 +179,21 @@ jobs:
         run: |
           sudo mkdir -p /images
           sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
+#      - name: Configure images folder for caching
+#        uses: actions/cache@v2
+#        with:
+#          path: /images
+#          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+#      - name: Load docker images
+#        run: docker load -i /images/images.tar.gz
+#      - name: Load docker images
+#        run: cd tests/compose/${{ matrix.target }} && docker-compose up -d
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
         with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: docker load -i /images/images.tar.gz
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -198,13 +220,13 @@ jobs:
         run: |
           sudo mkdir -p /images
           sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: docker load -i /images/images.tar.gz
+#      - name: Configure images folder for caching
+#        uses: actions/cache@v2
+#        with:
+#          path: /images
+#          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+#      - name: Load docker images
+#        run: docker load -i /images/images.tar.gz
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -220,8 +242,12 @@ jobs:
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}         
         uses: docker/bake-action@v2
         with:
-          files: tests/build.hcl
+          files: ${{env.HCL_FILE}}
           push: true
+          set: |
+            *.cache-from=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
+            *.platform=linux/amd64          
       - name: Deploy images to docker hub for master. For master we ony push tag master
         if: needs.derive-variables.outputs.BRANCH == 'master'
         env:
@@ -230,9 +256,13 @@ jobs:
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}        
         uses: docker/bake-action@v2
         with:
-          files: tests/build.hcl
+          files: ${{env.HCL_FILE}}
           push: true
-
+          set: |
+            *.cache-from=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
+            *.platform=linux/amd64          
+ 
   tag-release:
     if: needs.derive-variables.outputs.BRANCH != 'testing' && needs.derive-variables.outputs.BRANCH != 'staging' && needs.derive-variables.outputs.BRANCH != 'master'
     runs-on: ubuntu-latest
