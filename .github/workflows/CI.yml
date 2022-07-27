@@ -150,7 +150,7 @@ jobs:
           files: ${{env.HCL_FILE}}
           targets: ${{ matrix.target }}
           load: true
-          push: true
+          push: false
           set: |
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
             *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
