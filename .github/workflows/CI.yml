@@ -125,12 +125,12 @@ jobs:
 #      - name: Create folder for storing images
 #        run: |
 #          sudo mkdir -p /images
-#          sudo chmod 777 /images
-#      - name: Configure images folder for caching
-#        uses: actions/cache@v2
-#        with:
-#          path: /images
-#          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+##          sudo chmod 777 /images
+ #     - name: Configure images folder for caching
+ #       uses: actions/cache@v2
+ #       with:
+ #         path: /images
+ #         key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -147,7 +147,8 @@ jobs:
       # needed for gha cache?
       - name: setup github runtime
         uses: crazy-max/ghaction-github-runtime@v2
-      
+      - name: setup builder instance
+        run: buildx create --use
       - name: Build all docker images
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
@@ -233,7 +234,8 @@ jobs:
             *.platform=linux/amd64
       - name: setup github runtime
         uses: crazy-max/ghaction-github-runtime@v2
-      
+      - name: setup builder instance
+        run: buildx create --use
       - name: Build all docker images
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
@@ -248,7 +250,7 @@ jobs:
           set: |
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
             *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
-            *.platform=linux/amd64          
+            *.platform=linux/amd64       
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
