@@ -118,16 +118,16 @@ jobs:
         target: ${{ fromJson(needs.targets.outputs.matrix) }}      
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+#      - uses: actions/checkout@v3
+#      - name: Create folder for storing images
+#        run: |
+#          sudo mkdir -p /images
+#          sudo chmod 777 /images
+#      - name: Configure images folder for caching
+#        uses: actions/cache@v2
+#        with:
+#          path: /images
+#          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to ghcr.io
@@ -149,15 +149,15 @@ jobs:
         with:
           files: ${{env.HCL_FILE}}
           targets: ${{ matrix.target }}
-          load: true
-          push: false
+          load: false
+          push: true
           set: |
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
             *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
             *.platform=linux/amd64
-      - name: Save all docker images
+#      - name: Save all docker images
         #run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
-        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/${{ matrix.target }} -o /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
+#        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/${{ matrix.target }} -o /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
 
   tests:
     name: tests
@@ -176,32 +176,38 @@ jobs:
             time: "3"        
     steps:
       - uses: actions/checkout@v3
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
+#      - name: Create folder for storing images
+#        run: |
+#          sudo mkdir -p /images
+#          sudo chmod 777 /images
+#      - name: Configure images folder for caching
+#        uses: actions/cache@v2
+ #       with:
+ #         path: /images
+ #         key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+ #     - name: Load docker images
 #        run: docker load -i /images/images.tar.gz
-        run: |
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-clamav.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-dovecot.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-nginx.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-postfix.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-radicale.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rspamd.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-unbound.tar.gz
+  #      run: |
+  #         docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-clamav.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-dovecot.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-nginx.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-postfix.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-radicale.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rspamd.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
+#           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-unbound.tar.gz
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
