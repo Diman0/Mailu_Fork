@@ -156,7 +156,8 @@ jobs:
             *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
             *.platform=linux/amd64
       - name: Save all docker images
-        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+        #run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/${{ matrix.target }} /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
 
   tests:
     name: tests
@@ -185,7 +186,22 @@ jobs:
           path: /images
           key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Load docker images
-        run: docker load -i /images/images.tar.gz
+#        run: docker load -i /images/images.tar.gz
+        run: |
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-clamav.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-dovecot.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-nginx.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-postfix.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-radicale.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rspamd.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
+           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-unbound.tar.gz
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
