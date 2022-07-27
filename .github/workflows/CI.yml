@@ -85,8 +85,10 @@ jobs:
       - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
+        env:
+          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
-          echo "PINNED_MAILU_VERSION=${{ env.GITHUB_SHA }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
 
   build:
     name: Build images
@@ -115,14 +117,14 @@ jobs:
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}       
+          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}       
         uses: docker/bake-action@v2
         with:
           files: tests/build.hcl
           load: true
           push: false
       - name: Save all docker images
-        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/none ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
   test-core:
     name: Perform core tests
@@ -361,7 +363,7 @@ jobs:
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}         
+          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}         
         uses: docker/bake-action@v2
         with:
           files: tests/build.hcl
@@ -371,7 +373,7 @@ jobs:
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}        
+          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}        
         uses: docker/bake-action@v2
         with:
           files: tests/build.hcl
