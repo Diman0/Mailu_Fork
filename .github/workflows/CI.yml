@@ -149,7 +149,7 @@ jobs:
         with:
           files: ${{env.HCL_FILE}}
           targets: ${{ matrix.target }}
-          load: true
+          load: false
           push: false
           set: |
             *.output=type=docker,dest=/images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
