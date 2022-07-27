@@ -155,8 +155,8 @@ jobs:
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
             *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
             *.platform=linux/amd64
-#      - name: Save all docker images
-#        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
+      - name: Save all docker images
+        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
   tests:
     name: tests
@@ -179,21 +179,20 @@ jobs:
         run: |
           sudo mkdir -p /images
           sudo chmod 777 /images
-#      - name: Configure images folder for caching
-#        uses: actions/cache@v2
-#        with:
-#          path: /images
-#          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-#      - name: Load docker images
-#        run: docker load -i /images/images.tar.gz
-#      - name: Load docker images
-#        run: cd tests/compose/${{ matrix.target }} && docker-compose up -d
+      - name: Configure images folder for caching
+        uses: actions/cache@v2
+        with:
+          path: /images
+          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Load docker images
+        run: docker load -i /images/images.tar.gz
+      - name: Load docker images
+        run: cd tests/compose/${{ matrix.target }} && docker-compose up -d
       - name: Login to ghcr.io
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
