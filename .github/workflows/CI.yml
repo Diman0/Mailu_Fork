@@ -37,6 +37,7 @@ concurrency: ci-${{ github.ref }}
 env:
   DOCKER_ORG: diman
   DOCKER_ORG_TEST: diman
+  HCL_FILE: ./tests/build.hcl
 
 jobs:
   derive-variables:
@@ -147,6 +148,8 @@ jobs:
     name: tests
     runs-on: ubuntu-latest
     needs:
+      - derive-variables
+      - targets
       - build 
     strategy:
       fail-fast: false
