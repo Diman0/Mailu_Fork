@@ -122,15 +122,6 @@ jobs:
      packages: write     
     steps:
       - uses: actions/checkout@v3
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -153,7 +144,7 @@ jobs:
           push: false
           set: |
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
-            *.cache-to=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
             *.platform=linux/amd64
 
   tests:
@@ -176,31 +167,6 @@ jobs:
             time: "3"        
     steps:
       - uses: actions/checkout@v3
- #     - name: Create folder for storing images
- #       run: |
- #         sudo mkdir -p /images
- #         sudo chmod 777 /images
- #     - name: Configure images folder for caching
- #       uses: actions/cache@v2
- #       with:
- #         path: /images
- #         key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
- #     - name: Load docker images
- #       run: |
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antispam.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-front.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-imap.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-smtp.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antivirus.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-resolver.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
- #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-webdav.tar.gz  
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: setup buildx instance
         run: docker buildx create --use
@@ -230,7 +196,6 @@ jobs:
             *.cache-from=type=gha,scope=build-traefik-certdumper
             *.cache-from=type=gha,scope=build-webdav
             *.platform=linux/amd64        
-        
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -252,16 +217,7 @@ jobs:
       - build
       - tests
     steps:
-      - uses: actions/checkout@v3
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}       
+      - uses: actions/checkout@v3  
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
