@@ -157,7 +157,7 @@ jobs:
             *.platform=linux/amd64
       - name: Save all docker images
         #run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
-        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/${{ matrix.target }} /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
+        run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/${{ matrix.target }} -o /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
 
   tests:
     name: tests
