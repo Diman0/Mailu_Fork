@@ -115,7 +115,7 @@ jobs:
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}       
+          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}       
         uses: docker/bake-action@v2
         with:
           files: tests/build.hcl
@@ -361,7 +361,7 @@ jobs:
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}         
+          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}         
         uses: docker/bake-action@v2
         with:
           files: tests/build.hcl
@@ -371,7 +371,7 @@ jobs:
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}         
+          MAILU_PINNED_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}        
         uses: docker/bake-action@v2
         with:
           files: tests/build.hcl
