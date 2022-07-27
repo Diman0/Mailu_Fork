@@ -152,8 +152,8 @@ jobs:
           load: false
           push: false
           set: |
-            *.output=type=docker,dest=/images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-${{ matrix.target }}.tar.gz
-            *.cache-to=type=local,dest=/images/cache/${{ matrix.target }}
+            *.cache-from=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }}
             *.platform=linux/amd64
 
   tests:
@@ -176,31 +176,61 @@ jobs:
             time: "3"        
     steps:
       - uses: actions/checkout@v3
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
+ #     - name: Create folder for storing images
+ #       run: |
+ #         sudo mkdir -p /images
+ #         sudo chmod 777 /images
+ #     - name: Configure images folder for caching
+ #       uses: actions/cache@v2
+ #       with:
+ #         path: /images
+ #         key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+ #     - name: Load docker images
+ #       run: |
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antispam.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-front.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-imap.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-smtp.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antivirus.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-resolver.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
+ #          docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-webdav.tar.gz  
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: setup buildx instance
+        run: docker buildx create --use
+      - name: Build docker images for testing from cache
+        env:
+          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}         
+        uses: docker/bake-action@v2
         with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: |
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-docs.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-admin.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antispam.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-front.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-imap.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-smtp.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-rainloop.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-roundcube.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-antivirus.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-fetchmail.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-resolver.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
-           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-webdav.tar.gz  
+          files: ${{env.HCL_FILE}}
+          load: false
+          push: false
+          set: |
+            *.cache-from=type=gha,scope=build-setup
+            *.cache-from=type=gha,scope=build-admin
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-front
+            *.cache-from=type=gha,scope=build-imap
+            *.cache-from=type=gha,scope=build-smtp
+            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-roundcube
+            *.cache-from=type=gha,scope=build-antivirus
+            *.cache-from=type=gha,scope=build-fetchmail
+            *.cache-from=type=gha,scope=build-resolver
+            *.cache-from=type=gha,scope=build-traefik-certdumper
+            *.cache-from=type=gha,scope=build-webdav
+            *.platform=linux/amd64        
+        
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -239,6 +269,10 @@ jobs:
         with:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
+        # needed for gha cache?
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: setup buildx instance
+        run: docker buildx create --use
       - name: Deploy images to docker hub for anything but master.
         if:  needs.derive-variables.outputs.BRANCH != 'master'
         env:
@@ -250,20 +284,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=local,src=/images/cache/docs
-            *.cache-from=type=local,src=/images/cache/setup
-            *.cache-from=type=local,src=/images/cache/admin
-            *.cache-from=type=local,src=/images/cache/antispam
-            *.cache-from=type=local,src=/images/cache/front
-            *.cache-from=type=local,src=/images/cache/imap
-            *.cache-from=type=local,src=/images/cache/smtp
-            *.cache-from=type=local,src=/images/cache/rainloop
-            *.cache-from=type=local,src=/images/cache/roundcube
-            *.cache-from=type=local,src=/images/cache/antivirus
-            *.cache-from=type=local,src=/images/cache/fetchmail
-            *.cache-from=type=local,src=/images/cache/resolver
-            *.cache-from=type=local,src=/images/cache/traefik-certdumper
-            *.cache-from=type=local,src=/images/cache/webdav
+            *.cache-from=type=gha,scope=build-setup
+            *.cache-from=type=gha,scope=build-admin
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-front
+            *.cache-from=type=gha,scope=build-imap
+            *.cache-from=type=gha,scope=build-smtp
+            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-roundcube
+            *.cache-from=type=gha,scope=build-antivirus
+            *.cache-from=type=gha,scope=build-fetchmail
+            *.cache-from=type=gha,scope=build-resolver
+            *.cache-from=type=gha,scope=build-traefik-certdumper
+            *.cache-from=type=gha,scope=build-webdav
             *.platform=linux/amd64 
       - name: Deploy images to docker hub for master. For master we ony push tag master
         if: needs.derive-variables.outputs.BRANCH == 'master'
@@ -276,21 +310,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=local,src=/images/cache/docs
-            *.cache-from=type=local,src=/images/cache/setup
-            *.cache-from=type=local,src=/images/cache/admin
-            *.cache-from=type=local,src=/images/cache/antispam
-            *.cache-from=type=local,src=/images/cache/front
-            *.cache-from=type=local,src=/images/cache/imap
-            *.cache-from=type=local,src=/images/cache/smtp
-            *.cache-from=type=local,src=/images/cache/rainloop
-            *.cache-from=type=local,src=/images/cache/roundcube
-            *.cache-from=type=local,src=/images/cache/antivirus
-            *.cache-from=type=local,src=/images/cache/fetchmail
-            *.cache-from=type=local,src=/images/cache/resolver
-            *.cache-from=type=local,src=/images/cache/traefik-certdumper
-            *.cache-from=type=local,src=/images/cache/webdav
-            *.platform=linux/amd64 
+            *.cache-from=type=gha,scope=build-setup
+            *.cache-from=type=gha,scope=build-admin
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-front
+            *.cache-from=type=gha,scope=build-imap
+            *.cache-from=type=gha,scope=build-smtp
+            *.cache-from=type=gha,scope=build-rainloop
+            *.cache-from=type=gha,scope=build-roundcube
+            *.cache-from=type=gha,scope=build-antivirus
+            *.cache-from=type=gha,scope=build-fetchmail
+            *.cache-from=type=gha,scope=build-resolver
+            *.cache-from=type=gha,scope=build-traefik-certdumper
+            *.cache-from=type=gha,scope=build-webdav
             *.platform=linux/amd64          
             
   tag-release:
