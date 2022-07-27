@@ -148,7 +148,7 @@ jobs:
       - name: setup github runtime
         uses: crazy-max/ghaction-github-runtime@v2
       - name: setup builder instance
-        run: buildx create --use
+        run: docker buildx create --use
       - name: Build all docker images
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
@@ -235,7 +235,7 @@ jobs:
       - name: setup github runtime
         uses: crazy-max/ghaction-github-runtime@v2
       - name: setup builder instance
-        run: buildx create --use
+        run: docker buildx create --use
       - name: Build all docker images
         env:
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
