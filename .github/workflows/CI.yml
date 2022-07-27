@@ -118,7 +118,7 @@ jobs:
         target: ${{ fromJson(needs.targets.outputs.matrix) }}      
     runs-on: ubuntu-latest
     steps:
-#      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 #      - name: Create folder for storing images
 #        run: |
 #          sudo mkdir -p /images
