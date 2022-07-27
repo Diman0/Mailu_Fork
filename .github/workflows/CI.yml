@@ -133,12 +133,17 @@ jobs:
 #          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Login to ghcr.io
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.Docker_Login }}
+          password: ${{ secrets.Docker_Password }}        
+#      - name: Login to ghcr.io
+#        uses: docker/login-action@v2
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
       # needed for gha cache?
       - name: setup github runtime
         uses: crazy-max/ghaction-github-runtime@v2
@@ -152,8 +157,8 @@ jobs:
         with:
           files: ${{env.HCL_FILE}}
           targets: ${{ matrix.target }}
-          load: false
-          push: true
+          load: true
+          push: false
           set: |
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
             *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
@@ -208,12 +213,42 @@ jobs:
 #           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-setup.tar.gz
 #           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-traefik-certdumper.tar.gz
 #           docker load -i /images/${{ needs.derive-variables.outputs.DOCKER_ORG }}-unbound.tar.gz
-      - name: Login to ghcr.io
-        uses: docker/login-action@v2
+      - name: setup github runtime
+        uses: crazy-max/ghaction-github-runtime@v2
+      
+      - name: Build all docker images
+        env:
+          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}       
+        uses: docker/bake-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{env.HCL_FILE}}
+          targets: ${{ matrix.target }}
+          load: true
+          push: false
+          set: |
+            *.cache-from=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
+            *.platform=linux/amd64
+      - name: setup github runtime
+        uses: crazy-max/ghaction-github-runtime@v2
+      
+      - name: Build all docker images
+        env:
+          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
+          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}       
+        uses: docker/bake-action@v2
+        with:
+          files: ${{env.HCL_FILE}}
+          targets: ${{ matrix.target }}
+          load: true
+          push: false
+          set: |
+            *.cache-from=type=gha,scope=build-${{ matrix.target }}
+            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
+            *.platform=linux/amd64          
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
