@@ -204,7 +204,7 @@ jobs:
         run: python tests/compose/test.py ${{ matrix.target }} 3
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
+          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
 
   deploy:
