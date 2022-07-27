@@ -85,10 +85,8 @@ jobs:
       - name: Derive PINNED_MAILU_VERSION for master
         if: ${{ env.BRANCH == 'master' }}
         shell: bash
-        env:
-          GITHUB_SHA: ${{ env.GITHUB_SHA }}
         run: |
-          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ env.GITHUB_SHA }}" >> $GITHUB_ENV
 
   build:
     name: Build images
