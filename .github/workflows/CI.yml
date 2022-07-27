@@ -90,10 +90,27 @@ jobs:
         run: |
           echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
 
+  targets:
+    name: create targets
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create matrix
+        id: targets
+        run: |
+          echo ::set-output name=matrix::$(docker buildx bake -f ${{env.HCL_FILE}} --print | jq -cr '.group.default.targets')
+      - name: Show matrix
+        run: |
+          echo ${{ steps.targets.outputs.matrix }}
+
   build:
     name: Build images
     needs:
       - derive-variables
+      - targets
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -126,17 +143,21 @@ jobs:
       - name: Save all docker images
         run: docker save ${{ needs.derive-variables.outputs.DOCKER_ORG }}/admin ${{ needs.derive-variables.outputs.DOCKER_ORG }}/clamav ${{ needs.derive-variables.outputs.DOCKER_ORG }}/docs ${{ needs.derive-variables.outputs.DOCKER_ORG }}/dovecot ${{ needs.derive-variables.outputs.DOCKER_ORG }}/fetchmail ${{ needs.derive-variables.outputs.DOCKER_ORG }}/nginx ${{ needs.derive-variables.outputs.DOCKER_ORG }}/postfix ${{ needs.derive-variables.outputs.DOCKER_ORG }}/radicale ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rainloop ${{ needs.derive-variables.outputs.DOCKER_ORG }}/roundcube ${{ needs.derive-variables.outputs.DOCKER_ORG }}/rspamd ${{ needs.derive-variables.outputs.DOCKER_ORG }}/setup ${{ needs.derive-variables.outputs.DOCKER_ORG }}/traefik-certdumper ${{ needs.derive-variables.outputs.DOCKER_ORG }}/unbound -o /images/images.tar.gz
 
-  test-core:
-    name: Perform core tests
+  tests:
+    name: tests
     runs-on: ubuntu-latest
     needs:
-      - build
-      - derive-variables
+      - build 
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["core", "fetchmail", "filters", "rainloop", "roundcube", "webdav"]
+        time: ["2"]
+        include:
+          - target: "filters"
+            time: "3"        
     steps:
       - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
       - name: Create folder for storing images
         run: |
           sudo mkdir -p /images
@@ -152,173 +173,8 @@ jobs:
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: Test core suite
-        run: python tests/compose/test.py core 2
-        env:
-          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
-
-  test-fetchmail:
-    name: Perform fetchmail tests
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - derive-variables
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: docker load -i /images/images.tar.gz
-      - name: Install python packages
-        run: python3 -m pip install -r tests/requirements.txt
-      - name: Copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: Test fetch
-        run: python tests/compose/test.py fetchmail 2
-        env:
-          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
-
-  test-filters:
-    name: Perform filter tests
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - derive-variables
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: docker load -i /images/images.tar.gz
-      - name: Install python packages
-        run: python3 -m pip install -r tests/requirements.txt
-      - name: Copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: Test clamvav
-        run: python tests/compose/test.py filters 3
-        env:
-          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
-
-  test-rainloop:
-    name: Perform rainloop tests
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - derive-variables
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: docker load -i /images/images.tar.gz
-      - name: Install python packages
-        run: python3 -m pip install -r tests/requirements.txt
-      - name: Copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: Test rainloop
-        run: python tests/compose/test.py rainloop 2
-        env:
-          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
-
-  test-roundcube:
-    name: Perform roundcube tests
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - derive-variables
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: docker load -i /images/images.tar.gz
-      - name: Install python packages
-        run: python3 -m pip install -r tests/requirements.txt
-      - name: Copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: Test roundcube
-        run: python tests/compose/test.py roundcube 2
-        env:
-          MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
-          PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
-          DOCKER_ORG: ${{ needs.derive-variables.outputs.DOCKER_ORG }}
-
-  test-webdav:
-    name: Perform webdav tests
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - derive-variables
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
-      - name: Create folder for storing images
-        run: |
-          sudo mkdir -p /images
-          sudo chmod 777 /images
-      - name: Configure images folder for caching
-        uses: actions/cache@v2
-        with:
-          path: /images
-          key: ${{ needs.derive-variables.outputs.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Load docker images
-        run: docker load -i /images/images.tar.gz
-      - name: Install python packages
-        run: python3 -m pip install -r tests/requirements.txt
-      - name: Copy all certs
-        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
-      - name: Test webdav
-        run: python tests/compose/test.py webdav 2
+      - name: Test ${{ matrix.target }}
+        run: python tests/compose/test.py ${{ matrix.target }} 3
         env:
           MAILU_VERSION: ${{ needs.derive-variables.outputs.MAILU_VERSION }}
           PINNED_MAILU_VERSION: ${{ needs.derive-variables.outputs.PINNED_MAILU_VERSION }}
@@ -332,12 +188,7 @@ jobs:
     needs:
       - derive-variables
       - build
-      - test-core
-      - test-fetchmail
-      - test-filters
-      - test-rainloop
-      - test-roundcube
-      - test-webdav
+      - tests
     steps:
       - uses: actions/checkout@v3
       - name: Create folder for storing images
