@@ -184,6 +184,9 @@ jobs:
         include:
           - target: "filters"
             time: "3"
+        exclude:
+          - target: "filters"
+            time: "2"
     steps:
       - uses: actions/checkout@v3
       - name: Retrieve global variables
