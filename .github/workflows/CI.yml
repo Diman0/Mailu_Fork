@@ -181,9 +181,9 @@ jobs:
           load: true
           push: false
           set: |
+            *.cache-from=type=gha,scope=build-docs
             *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-admin            
             *.cache-from=type=gha,scope=build-antispam
             *.cache-from=type=gha,scope=build-front
             *.cache-from=type=gha,scope=build-imap
@@ -239,9 +239,9 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
+            *.cache-from=type=gha,scope=build-docs
             *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
+            *.cache-from=type=gha,scope=build-admin            
             *.cache-from=type=gha,scope=build-antispam
             *.cache-from=type=gha,scope=build-front
             *.cache-from=type=gha,scope=build-imap
