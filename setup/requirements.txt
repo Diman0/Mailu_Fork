@@ -6,7 +6,7 @@ Jinja2==3.0.3
 MarkupSafe==2.1.0
 Werkzeug==2.0.3
 click==8.0.3
-dominate==2.6.0
+dominate==2.7.0
 itsdangerous==2.0.1
 redis==3.2.1
 visitor==0.1.3
