@@ -16,7 +16,7 @@ RUN apk add --no-cache --virtual .build-deps \
 
 
 # Build nginx deployment image including generated html
-FROM nginx:1.21-alpine
+FROM nginx:1.23.1-alpine
 
 ARG version=master
 ARG pinned_version=master
