@@ -147,8 +147,6 @@ jobs:
         with:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
-      - name: setup builder instance
-        run: docker buildx create --use
       - name: Build all docker images
         env:
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
@@ -196,8 +194,8 @@ jobs:
           echo "MAILU_VERSION=${{needs.derive-variables.outputs.MAILU_VERSION}}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{needs.derive-variables.outputs.DOCKER_ORG}}" >> $GITHUB_ENV
-      - name: setup buildx instance
-        run: docker buildx create --use
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: Build docker images for testing from cache
         env:
@@ -230,7 +228,7 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test ${{ matrix.target }}
-        run: python tests/compose/test.py ${{ matrix.target }} 3
+        run: python tests/compose/test.py ${{ matrix.target }} ${{ matrix.time }}
         env:
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
