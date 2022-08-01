@@ -1,102 +1,76 @@
-name: CI
+name: build-test-deploy
 on:
-  push:
-    branches:
-      - staging
-      - testing
-      - '1.8'
-      - '1.9'
-      - '1.10'
-      - '1.11'
-      - master
-      # test branches, e.g. test-debian
-      - test-*
+  workflow_call:
+    inputs:
+      architecture:
+        description: 'The architecture of the images that will be build.'
+        required: false
+        default: 'linux/amd64'
+        type: string
+      mailu_version:
+        description: 'The main version that is build. E.g. master or x.y.'
+        required: true
+        type: string
+      pinned_mailu_version:
+        description: 'The specific version that is build. E.g. commit hash or x.y.z.'
+        required: true
+        type: string
+      docker_org:
+        description: 'The docker organisation where the images are pushed to.'
+        required: true
+        type: string
+      branch:
+        description: 'The branch that triggered this workflow.'
+        required: true
+        type: string
+      deploy:
+        description: Deploy to docker hub. Happens for all branches but staging
+        default: true
+        required: false
+        type: boolean
+      release:
+        description: 'Tag and create the github release. Only happens for branch x.y (release branch)'
+        default: false
+        required: false
+        type: boolean
 
-concurrency: ci-${{ github.ref }}
-
-###############################################
-# REQUIRED secrets
-# DOCKER_UN: ${{ secrets.Docker_Login }}
-#    Username of docker login for pushing the images to repo $DOCKER_ORG and $DOCKER_ORG_TESTS
-# DOCKER_PW: ${{ secrets.Docker_Password }}
-#    Password of docker login for pushing the images to repo $DOCKER_ORG and $DOCKER_ORG_TESTS
-# Add the above secrets to your github repo to determine where the images will be pushed.
-################################################
-# Code block that is used as one liner.
-##!/bin/bash
-#version=$( git tag --sort=version:refname --list "{{ env.MAILU_VERSION }}.*" | tail -1  )
-#root_version=${version%.*}
-#patch_version=${version##*.}
-#if [ "$patch_version" == "" ]
-#then
-#  pinned_version={{ env.MAILU_VERSION }}.0
-#else
-#  pinned_version=$root_version.$(expr $patch_version + 1)
-#fi
-#echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-################################################
-# REQUIRED global variables
-# DOCKER_ORG, docker org used for pushing release images (branch x.y and master)
-# DOCKER_ORG_TEST, docker org used for pushing images for testing (branch testing).
+  workflow_dispatch:
+    inputs:
+      architecture:
+        description: 'The architecture of the images that will be build.'
+        required: false
+        default: 'linux/amd64'
+        type: string
+      mailu_version:
+        description: 'The main version that is build. E.g. master or x.y.'
+        required: true
+        type: string
+      pinned_mailu_version:
+        description: 'The specific version that is build. E.g. commit hash or x.y.z.'
+        required: true
+        type: string
+      docker_org:
+        description: 'The docker organisation where the images are pushed to.'
+        required: true
+        type: string
+      branch:
+        description: 'The branch that triggered this workflow.'
+        required: true
+        type: string
+      deploy:
+        description: Deploy to docker hub. Happens for all branches but staging
+        default: true
+        required: false
+        type: boolean
+      release:
+        description: 'Tag and create the github release. Only happens for branch x.y (release branch)'
+        default: false
+        required: false
+        type: boolean
 env:
-  DOCKER_ORG: diman
-  DOCKER_ORG_TEST: diman
   HCL_FILE: ./tests/build.hcl
 
 jobs:
-# This job calculates all global job variables that are required by all the subsequent jobs.
-# All subsequent jobs will retrieve and use these variables. This way the variables only have to be derived once.
-  derive-variables:
-    name: derive variables
-    runs-on: ubuntu-latest
-    outputs:
-        MAILU_VERSION: ${{ env.MAILU_VERSION }}
-        PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}
-        DOCKER_ORG: ${{ env.DOCKER_ORG_DERIVED }}
-        BRANCH: ${{ env.BRANCH }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # fetch-depth 0 is required to also retrieve all tags.
-          fetch-depth: 0
-      - name: Extract branch name
-        shell: bash
-        run: |
-          echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-        #For branch TESTING, we set the image tag to PR-xxxx
-      - name: Derive MAILU_VERSION and PINNED_MAILU_VERSION for branch testing
-        if: env.BRANCH == 'testing'
-        shell: bash
-        env:
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        run: |
-          echo "MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=pr-${COMMIT_MESSAGE//[!0-9]/}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG_TEST }}" >> $GITHUB_ENV
-      - name: Derive MAILU_VERSION for other branches than testing
-        if: env.BRANCH != 'testing'
-        shell: bash
-        run: |
-          echo "MAILU_VERSION=${{ env.BRANCH }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG_DERIVED=${{ env.DOCKER_ORG }}" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for normal release x.y
-        if: env.BRANCH != 'testing' && env.BRANCH != 'staging' && env.BRANCH != 'master'
-        shell: bash
-        run: |
-          version=$( git tag --sort=version:refname --list "${{ env.MAILU_VERSION }}.*" | tail -1  );root_version=${version%.*};patch_version=${version##*.};if [ "$patch_version" == "" ]; then pinned_version=${{ env.MAILU_VERSION }}.0; else pinned_version=$root_version.$(expr $patch_version + 1); fi;echo "PINNED_MAILU_VERSION=$pinned_version" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for staging
-        if: env.BRANCH == 'staging'
-        shell: bash
-        run: |
-          echo "PINNED_MAILU_VERSION=staging" >> $GITHUB_ENV
-      - name: Derive PINNED_MAILU_VERSION for master
-        if: env.BRANCH == 'master'
-        shell: bash
-        env:
-          GITHUB_SHA: ${{ env.GITHUB_SHA }}
-        run: |
-          echo "PINNED_MAILU_VERSION=$GITHUB_SHA" >> $GITHUB_ENV
-
 # This job calculates what images must be build. It reads the build.hcl file and then outputs all targets (images) in it.
 # This is used by the next build job.
   targets:
@@ -135,10 +109,12 @@ jobs:
       - name: Retrieve global variables
         shell: bash
         run: |
-          echo "BRANCH=${{needs.derive-variables.outputs.BRANCH}}" >> $GITHUB_ENV
-          echo "MAILU_VERSION=${{needs.derive-variables.outputs.MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{needs.derive-variables.outputs.DOCKER_ORG}}" >> $GITHUB_ENV
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -147,6 +123,8 @@ jobs:
         with:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
+      - name: setup builder instance
+        run: docker buildx create --use
       - name: Build all docker images
         env:
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
@@ -161,7 +139,7 @@ jobs:
           set: |
             *.cache-from=type=gha,scope=build-${{ matrix.target }}
             *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=max
-            *.platform=linux/amd64
+            *.platform=${{ input.architecture }}
 
 # This job runs all the tests.
   tests:
@@ -190,12 +168,14 @@ jobs:
       - name: Retrieve global variables
         shell: bash
         run: |
-          echo "BRANCH=${{needs.derive-variables.outputs.BRANCH}}" >> $GITHUB_ENV
-          echo "MAILU_VERSION=${{needs.derive-variables.outputs.MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{needs.derive-variables.outputs.DOCKER_ORG}}" >> $GITHUB_ENV
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: setup buildx instance
+        run: docker buildx create --use
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: Build docker images for testing from cache
         env:
@@ -228,7 +208,7 @@ jobs:
       - name: Copy all certs
         run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
       - name: Test ${{ matrix.target }}
-        run: python tests/compose/test.py ${{ matrix.target }} ${{ matrix.time }}
+        run: python tests/compose/test.py ${{ matrix.target }} 3
         env:
           DOCKER_ORG: ${{ env.DOCKER_ORG }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}
@@ -239,7 +219,7 @@ jobs:
   deploy:
     name: Deploy images
     # Deploying is not required for staging
-    if: needs.derive-variables.outputs.BRANCH != 'staging'
+    if: inputs.deploy
     runs-on: ubuntu-latest
     needs:
       - derive-variables
@@ -250,10 +230,12 @@ jobs:
       - name: Retrieve global variables
         shell: bash
         run: |
-          echo "BRANCH=${{needs.derive-variables.outputs.BRANCH}}" >> $GITHUB_ENV
-          echo "MAILU_VERSION=${{needs.derive-variables.outputs.MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{needs.derive-variables.outputs.DOCKER_ORG}}" >> $GITHUB_ENV
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -292,7 +274,7 @@ jobs:
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:
-    if: needs.derive-variables.outputs.BRANCH != 'testing' && needs.derive-variables.outputs.BRANCH != 'staging' && needs.derive-variables.outputs.BRANCH != 'master'
+    if: inputs.release
     runs-on: ubuntu-latest
     needs:
       - deploy
@@ -305,10 +287,10 @@ jobs:
       - name: Retrieve global variables
         shell: bash
         run: |
-          echo "BRANCH=${{needs.derive-variables.outputs.BRANCH}}" >> $GITHUB_ENV
-          echo "MAILU_VERSION=${{needs.derive-variables.outputs.MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "PINNED_MAILU_VERSION=${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{needs.derive-variables.outputs.DOCKER_ORG}}" >> $GITHUB_ENV
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
       - name: Create tag for branch x.y.
         shell: bash
         run: |
@@ -322,14 +304,3 @@ jobs:
           tag: ${{ env.PINNED_MAILU_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
- # This job is watched by bors. It only complets if building,testing and deploy worked.
-  ci-success:
-    name: CI-Done
-    #Returns true when none of the **previous** steps have failed or have been canceled.
-    if: success()
-    needs:
-      - deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: CI/CD succeeded.
-        run: exit 0
