@@ -102,7 +102,7 @@ jobs:
           echo "DOCKER_ORG=${{needs.derive-variables.outputs.DOCKER_ORG}}" >> $GITHUB_ENV
           echo "DEPLOY=${{needs.derive-variables.outputs.DEPLOY}}" >> $GITHUB_ENV
           echo "RELEASE=${{needs.derive-variables.outputs.RELEASE}}" >> $GITHUB_ENV
-      - uses: ./.github/workflows/build_test_deploy.yml@master
+      - uses: ./.github/workflows/build_test_deploy.yml
         with:
           architecture: 'linux/arm64,linux/arm/v6,linux/arm/v7'
           mailu_version: ${{ env.MAILU_VERSION }}
