@@ -72,6 +72,8 @@ jobs:
           echo "RELEASE=false" >> $GITHUB_ENV
 
   build-test-deploy:
+    needs:
+      - derive-variables
     uses: ./.github/workflows/build_test_deploy.yml
     with:
       mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}
