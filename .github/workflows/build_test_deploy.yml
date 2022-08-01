@@ -94,7 +94,6 @@ jobs:
   build:
     name: Build images
     needs:
-      - derive-variables
       - targets
     strategy:
       fail-fast: false
@@ -149,7 +148,6 @@ jobs:
      contents: read
      packages: read
     needs:
-      - derive-variables
       - targets
       - build
     strategy:
@@ -222,7 +220,6 @@ jobs:
     if: inputs.deploy
     runs-on: ubuntu-latest
     needs:
-      - derive-variables
       - build
       - tests
     steps:
@@ -278,7 +275,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - deploy
-      - derive-variables
     steps:
       - uses: actions/checkout@v3
         with:
