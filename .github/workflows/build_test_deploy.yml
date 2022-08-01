@@ -39,39 +39,6 @@ on:
       Docker_Password:
         required: true
 
-  workflow_dispatch:
-    inputs:
-      architecture:
-        description: 'The architecture of the images that will be build.'
-        required: false
-        default: 'linux/amd64'
-        type: string
-      mailu_version:
-        description: 'The main version that is build. E.g. master or x.y.'
-        required: true
-        type: string
-      pinned_mailu_version:
-        description: 'The specific version that is build. E.g. commit hash or x.y.z.'
-        required: true
-        type: string
-      docker_org:
-        description: 'The docker organisation where the images are pushed to.'
-        required: true
-        type: string
-      branch:
-        description: 'The branch that triggered this workflow.'
-        required: true
-        type: string
-      deploy:
-        description: Deploy to docker hub. Happens for all branches but staging
-        default: true
-        required: false
-        type: boolean
-      release:
-        description: 'Tag and create the github release. Only happens for branch x.y (release branch)'
-        default: false
-        required: false
-        type: boolean
 env:
   HCL_FILE: ./tests/build.hcl
 
