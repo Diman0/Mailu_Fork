@@ -76,16 +76,13 @@ jobs:
       - derive-variables
     uses: ./.github/workflows/build_test_deploy.yml
     with:
-      architecture: 'linux/arm64,linux/arm/v6,linux/arm/v7'
       mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}
       pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}
       branch: ${{needs.derive-variables.outputs.BRANCH}}
       deploy: ${{needs.derive-variables.outputs.DEPLOY}}
       release: ${{needs.derive-variables.outputs.RELEASE}}
-    secrets: 
-      Docker_Login: ${{ secrets.Docker_Login }}
-      Docker_Password: ${{ secrets.Docker_Password }}
+    secrets: inherit
 
 ################################################
 # Code block that is used as one liner for the step:
