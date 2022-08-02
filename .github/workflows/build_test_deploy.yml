@@ -141,6 +141,7 @@ jobs:
 # This job runs all the tests.
   tests:
     name: tests
+    if: inputs.architecture == 'linux/amd64'
     runs-on: ubuntu-latest
     permissions:
      contents: read
@@ -203,7 +204,7 @@ jobs:
             *.cache-from=type=gha,scope=build-resolver
             *.cache-from=type=gha,scope=build-traefik-certdumper
             *.cache-from=type=gha,scope=build-webdav
-            *.platform=linux/amd64
+            *.platform=${{ inputs.architecture }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
       - name: Copy all certs
@@ -268,7 +269,7 @@ jobs:
             *.cache-from=type=gha,scope=build-resolver
             *.cache-from=type=gha,scope=build-traefik-certdumper
             *.cache-from=type=gha,scope=build-webdav
-            *.platform=linux/amd64
+            *.platform=${{ inputs.architecture }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:
