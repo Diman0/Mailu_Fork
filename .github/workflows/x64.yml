@@ -7,7 +7,7 @@ on:
       - '1.9'
       - master
 
-concurrency: ci-${{ github.ref }}
+concurrency: ci-x64-${{ github.ref }}
 
 ###############################################
 # REQUIRED secrets

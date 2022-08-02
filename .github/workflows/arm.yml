@@ -5,7 +5,7 @@ on:
       - '1.9'
       - master
 
-concurrency: ci-${{ github.ref }}
+concurrency: ci-arm-${{ github.ref }}
 
 ###############################################
 # REQUIRED secrets
