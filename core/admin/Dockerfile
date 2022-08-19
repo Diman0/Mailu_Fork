@@ -43,10 +43,10 @@ RUN set -eu \
  && apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo git \
  && mkdir -p ~/.cargo/registry/index \
  && cd ~/.cargo/registry/index \
- && git clone --bare https://github.com/rust-lang/crates.io-index.git
+ && git clone --bare https://github.com/rust-lang/crates.io-index.git \
  && pip install --upgrade pip \
  && pip install -r requirements.txt \
- && apk del --no-cache build-dep
+ && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git
 
 COPY --from=assets static ./mailu/static
 COPY mailu ./mailu
