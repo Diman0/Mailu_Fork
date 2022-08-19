@@ -41,11 +41,11 @@ RUN set -eu \
  if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
  pip install --upgrade pip \
  && pip install -r requirements.txt \
- && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git \
+ && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git ; \
  elif [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
  pip install --upgrade pip \
  && pip install --index-url=https://www.piwheels.org/simple --no-cache-dir -r requirements.txt \
- && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git \
+ && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git ; \
  fi
   
 COPY --from=assets static ./mailu/static
