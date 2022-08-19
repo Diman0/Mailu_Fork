@@ -1,5 +1,6 @@
 # First stage to build assets
 ARG DISTRO=alpine:3.14.5
+ARG TARGETPLATFORM
 
 FROM node:16-alpine3.16 as assets
 
@@ -16,7 +17,6 @@ RUN set -eu \
       cp node_modules/datatables.net-plugins/i18n/${l#*:}.json assets/${l%:*}.json; \
     done \
  && node_modules/.bin/webpack-cli --color
-
 
 # Actual application
 FROM $DISTRO
@@ -35,19 +35,19 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY requirements-prod.txt requirements.txt
-RUN mkdir -p ~/.cargo/registry/index \
- && cd ~/.cargo/registry/index \
- && git clone --bare https://github.com/rust-lang/crates.io-index.git github.com-1285ae84e5963aae
 RUN set -eu \
  && apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
  && apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo git \
- && mkdir -p ~/.cargo/registry/index \
- && cd ~/.cargo/registry/index \
- && git clone --bare https://github.com/rust-lang/crates.io-index.git \
- && pip install --upgrade pip \
- && pip install -r requirements.txt \
- && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git
-
+ if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+  && pip install --upgrade pip \
+  && pip install -r requirements.txt \
+  && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git; \
+  elif [ "$TARGETPLATFORM" = "linux/arm/v7" ] ||  [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+  && pip install --upgrade pip \
+  && pip install --index-url=https://www.piwheels.org/simple --no-cache-dir -r requirements.txt \
+  && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git; \
+  fi
+  
 COPY --from=assets static ./mailu/static
 COPY mailu ./mailu
 COPY migrations ./migrations
