@@ -1,6 +1,5 @@
 # First stage to build assets
 ARG DISTRO=alpine:3.14.5
-ARG TARGETPLATFORM
 
 FROM node:16-alpine3.16 as assets
 
@@ -17,6 +16,7 @@ RUN set -eu \
       cp node_modules/datatables.net-plugins/i18n/${l#*:}.json assets/${l%:*}.json; \
     done \
  && node_modules/.bin/webpack-cli --color
+
 
 # Actual application
 FROM $DISTRO
@@ -37,17 +37,12 @@ WORKDIR /app
 COPY requirements-prod.txt requirements.txt
 RUN set -eu \
  && apk add --no-cache libressl curl postgresql-libs mariadb-connector-c \
- && apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo git \
- if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
- pip install --upgrade pip \
+ && pip install --no-cache-dir --extra-index-url=https://www.piwheels.org/simple -r requirements.txt --only-binary=:all: --no-binary=Flask-bootstrap,PyYAML,SQLAlchemy \
+ || ( apk add --no-cache --virtual build-dep libressl-dev libffi-dev python3-dev build-base postgresql-dev mariadb-connector-c-dev cargo \
+ && pip install --upgrade pip \
  && pip install -r requirements.txt \
- && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git ; \
- elif [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
- pip install --upgrade pip \
- && pip install --index-url=https://www.piwheels.org/simple --no-cache-dir -r requirements.txt \
- && apk del --no-cache build-dep libressl-dev libffi-dev python3-dev postgresql-dev mariadb-connector-c-dev cargo git ; \
- fi
-  
+ && apk del --no-cache build-dep )
+
 COPY --from=assets static ./mailu/static
 COPY mailu ./mailu
 COPY migrations ./migrations
