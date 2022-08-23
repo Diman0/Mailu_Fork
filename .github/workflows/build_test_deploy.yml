@@ -112,6 +112,15 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Create folder for storing build cache
+        run: |
+          sudo mkdir -p /cache
+          sudo chmod 777 /cache
+      - name: Configure /cache folder for storing tar.gz of cache
+        uses: actions/cache@v2
+        with:
+          path: /cache
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -134,9 +143,10 @@ jobs:
           load: false
           push: false
           set: |
-            *.cache-from=type=gha,scope=build-${{ matrix.target }}
-            *.cache-to=type=gha,scope=build-${{ matrix.target }},mode=min
+            *.cache-to=type=local,dest=/tmp/cache/{{ matrix.target }},mode=max
             *.platform=${{ inputs.architecture }}
+      - name: Compress the cache folders to tar.gz
+        run: tar -cf /cache/cache.tar.gz /tmp/cache
 
 # This job runs all the tests.
   tests:
@@ -169,6 +179,17 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Create folder for storing build cache
+        run: |
+          sudo mkdir -p /cache
+          sudo chmod 777 /cache
+      - name: Configure /cache folder for storing tar.gz of cache
+        uses: actions/cache@v2
+        with:
+          path: /cache
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Compress the cache folders to tar.gz
+        run: tar -xf /cache/cache.tar.gz -C /tmp/cache
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -190,20 +211,20 @@ jobs:
           load: true
           push: false
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=local,dest=/tmp/cache/docs
+            *.cache-from=type=local,dest=/tmp/cache/setup
+            *.cache-from=type=local,dest=/tmp/cache/admin
+            *.cache-from=type=local,dest=/tmp/cache/antispam
+            *.cache-from=type=local,dest=/tmp/cache/front
+            *.cache-from=type=local,dest=/tmp/cache/imap
+            *.cache-from=type=local,dest=/tmp/cache/smtp
+            *.cache-from=type=local,dest=/tmp/cache/snappymail
+            *.cache-from=type=local,dest=/tmp/cache/roundcube
+            *.cache-from=type=local,dest=/tmp/cache/antivirus
+            *.cache-from=type=local,dest=/tmp/cache/fetchmail
+            *.cache-from=type=local,dest=/tmp/cache/resolver
+            *.cache-from=type=local,dest=/tmp/cache/traefik-certdumper
+            *.cache-from=type=local,dest=/tmp/cache/webdav
             *.platform=${{ inputs.architecture }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
@@ -235,6 +256,17 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Create folder for storing build cache
+        run: |
+          sudo mkdir -p /cache
+          sudo chmod 777 /cache
+      - name: Configure /cache folder for storing tar.gz of cache
+        uses: actions/cache@v2
+        with:
+          path: /cache
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Compress the cache folders to tar.gz
+        run: tar -xf /cache/cache.tar.gz -C /tmp/cache
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -255,20 +287,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=local,dest=/tmp/cache/docs
+            *.cache-from=type=local,dest=/tmp/cache/setup
+            *.cache-from=type=local,dest=/tmp/cache/admin
+            *.cache-from=type=local,dest=/tmp/cache/antispam
+            *.cache-from=type=local,dest=/tmp/cache/front
+            *.cache-from=type=local,dest=/tmp/cache/imap
+            *.cache-from=type=local,dest=/tmp/cache/smtp
+            *.cache-from=type=local,dest=/tmp/cache/snappymail
+            *.cache-from=type=local,dest=/tmp/cache/roundcube
+            *.cache-from=type=local,dest=/tmp/cache/antivirus
+            *.cache-from=type=local,dest=/tmp/cache/fetchmail
+            *.cache-from=type=local,dest=/tmp/cache/resolver
+            *.cache-from=type=local,dest=/tmp/cache/traefik-certdumper
+            *.cache-from=type=local,dest=/tmp/cache/webdav
             *.platform=${{ inputs.architecture }}
 
   deploy-arm:
@@ -287,6 +319,17 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Create folder for storing build cache
+        run: |
+          sudo mkdir -p /cache
+          sudo chmod 777 /cache
+      - name: Configure /cache folder for storing tar.gz of cache
+        uses: actions/cache@v2
+        with:
+          path: /cache
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+      - name: Compress the cache folders to tar.gz
+        run: tar -xf /cache/cache.tar.gz -C /tmp/cache
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -307,20 +350,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=gha,scope=build-docs
-            *.cache-from=type=gha,scope=build-setup
-            *.cache-from=type=gha,scope=build-admin
-            *.cache-from=type=gha,scope=build-antispam
-            *.cache-from=type=gha,scope=build-front
-            *.cache-from=type=gha,scope=build-imap
-            *.cache-from=type=gha,scope=build-smtp
-            *.cache-from=type=gha,scope=build-snappymail
-            *.cache-from=type=gha,scope=build-roundcube
-            *.cache-from=type=gha,scope=build-antivirus
-            *.cache-from=type=gha,scope=build-fetchmail
-            *.cache-from=type=gha,scope=build-resolver
-            *.cache-from=type=gha,scope=build-traefik-certdumper
-            *.cache-from=type=gha,scope=build-webdav
+            *.cache-from=type=local,dest=/tmp/cache/docs
+            *.cache-from=type=local,dest=/tmp/cache/setup
+            *.cache-from=type=local,dest=/tmp/cache/admin
+            *.cache-from=type=local,dest=/tmp/cache/antispam
+            *.cache-from=type=local,dest=/tmp/cache/front
+            *.cache-from=type=local,dest=/tmp/cache/imap
+            *.cache-from=type=local,dest=/tmp/cache/smtp
+            *.cache-from=type=local,dest=/tmp/cache/snappymail
+            *.cache-from=type=local,dest=/tmp/cache/roundcube
+            *.cache-from=type=local,dest=/tmp/cache/antivirus
+            *.cache-from=type=local,dest=/tmp/cache/fetchmail
+            *.cache-from=type=local,dest=/tmp/cache/resolver
+            *.cache-from=type=local,dest=/tmp/cache/traefik-certdumper
+            *.cache-from=type=local,dest=/tmp/cache/webdav
             *.platform=${{ inputs.architecture }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
