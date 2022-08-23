@@ -139,6 +139,7 @@ jobs:
           load: false
           push: false
           set: |
+            *.cache-from=type=local,src=/tmp/cache/${{ matrix.target }}
             *.cache-to=type=local,dest=/tmp/cache/${{ matrix.target }},mode=max
             *.platform=${{ inputs.architecture }}
 
