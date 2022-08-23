@@ -264,20 +264,20 @@ jobs:
           load: true
           push: false
           set: |
-            *.cache-from=type=local,dest=/tmp/cache/docs
-            *.cache-from=type=local,dest=/tmp/cache/setup
-            *.cache-from=type=local,dest=/tmp/cache/admin
-            *.cache-from=type=local,dest=/tmp/cache/antispam
-            *.cache-from=type=local,dest=/tmp/cache/front
-            *.cache-from=type=local,dest=/tmp/cache/imap
-            *.cache-from=type=local,dest=/tmp/cache/smtp
-            *.cache-from=type=local,dest=/tmp/cache/snappymail
-            *.cache-from=type=local,dest=/tmp/cache/roundcube
-            *.cache-from=type=local,dest=/tmp/cache/antivirus
-            *.cache-from=type=local,dest=/tmp/cache/fetchmail
-            *.cache-from=type=local,dest=/tmp/cache/resolver
-            *.cache-from=type=local,dest=/tmp/cache/traefik-certdumper
-            *.cache-from=type=local,dest=/tmp/cache/webdav
+            *.cache-from=type=local,src=/tmp/cache/docs
+            *.cache-from=type=local,src=/tmp/cache/setup
+            *.cache-from=type=local,src=/tmp/cache/admin
+            *.cache-from=type=local,src=/tmp/cache/antispam
+            *.cache-from=type=local,src=/tmp/cache/front
+            *.cache-from=type=local,src=/tmp/cache/imap
+            *.cache-from=type=local,src=/tmp/cache/smtp
+            *.cache-from=type=local,src=/tmp/cache/snappymail
+            *.cache-from=type=local,src=/tmp/cache/roundcube
+            *.cache-from=type=local,src=/tmp/cache/antivirus
+            *.cache-from=type=local,src=/tmp/cache/fetchmail
+            *.cache-from=type=local,src=/tmp/cache/resolver
+            *.cache-from=type=local,src=/tmp/cache/traefik-certdumper
+            *.cache-from=type=local,src=/tmp/cache/webdav
             *.platform=${{ inputs.architecture }}
       - name: Install python packages
         run: python3 -m pip install -r tests/requirements.txt
@@ -399,20 +399,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=local,dest=/tmp/cache/docs
-            *.cache-from=type=local,dest=/tmp/cache/setup
-            *.cache-from=type=local,dest=/tmp/cache/admin
-            *.cache-from=type=local,dest=/tmp/cache/antispam
-            *.cache-from=type=local,dest=/tmp/cache/front
-            *.cache-from=type=local,dest=/tmp/cache/imap
-            *.cache-from=type=local,dest=/tmp/cache/smtp
-            *.cache-from=type=local,dest=/tmp/cache/snappymail
-            *.cache-from=type=local,dest=/tmp/cache/roundcube
-            *.cache-from=type=local,dest=/tmp/cache/antivirus
-            *.cache-from=type=local,dest=/tmp/cache/fetchmail
-            *.cache-from=type=local,dest=/tmp/cache/resolver
-            *.cache-from=type=local,dest=/tmp/cache/traefik-certdumper
-            *.cache-from=type=local,dest=/tmp/cache/webdav
+            *.cache-from=type=local,src=/tmp/cache/docs
+            *.cache-from=type=local,src=/tmp/cache/setup
+            *.cache-from=type=local,src=/tmp/cache/admin
+            *.cache-from=type=local,src=/tmp/cache/antispam
+            *.cache-from=type=local,src=/tmp/cache/front
+            *.cache-from=type=local,src=/tmp/cache/imap
+            *.cache-from=type=local,src=/tmp/cache/smtp
+            *.cache-from=type=local,src=/tmp/cache/snappymail
+            *.cache-from=type=local,src=/tmp/cache/roundcube
+            *.cache-from=type=local,src=/tmp/cache/antivirus
+            *.cache-from=type=local,src=/tmp/cache/fetchmail
+            *.cache-from=type=local,src=/tmp/cache/resolver
+            *.cache-from=type=local,src=/tmp/cache/traefik-certdumper
+            *.cache-from=type=local,src=/tmp/cache/webdav
             *.platform=${{ inputs.architecture }}
 
   deploy-arm:
@@ -521,20 +521,20 @@ jobs:
           files: ${{env.HCL_FILE}}
           push: true
           set: |
-            *.cache-from=type=local,dest=/tmp/cache/docs
-            *.cache-from=type=local,dest=/tmp/cache/setup
-            *.cache-from=type=local,dest=/tmp/cache/admin
-            *.cache-from=type=local,dest=/tmp/cache/antispam
-            *.cache-from=type=local,dest=/tmp/cache/front
-            *.cache-from=type=local,dest=/tmp/cache/imap
-            *.cache-from=type=local,dest=/tmp/cache/smtp
-            *.cache-from=type=local,dest=/tmp/cache/snappymail
-            *.cache-from=type=local,dest=/tmp/cache/roundcube
-            *.cache-from=type=local,dest=/tmp/cache/antivirus
-            *.cache-from=type=local,dest=/tmp/cache/fetchmail
-            *.cache-from=type=local,dest=/tmp/cache/resolver
-            *.cache-from=type=local,dest=/tmp/cache/traefik-certdumper
-            *.cache-from=type=local,dest=/tmp/cache/webdav
+            *.cache-from=type=local,src=/tmp/cache/docs
+            *.cache-from=type=local,src=/tmp/cache/setup
+            *.cache-from=type=local,src=/tmp/cache/admin
+            *.cache-from=type=local,src=/tmp/cache/antispam
+            *.cache-from=type=local,src=/tmp/cache/front
+            *.cache-from=type=local,src=/tmp/cache/imap
+            *.cache-from=type=local,src=/tmp/cache/smtp
+            *.cache-from=type=local,src=/tmp/cache/snappymail
+            *.cache-from=type=local,src=/tmp/cache/roundcube
+            *.cache-from=type=local,src=/tmp/cache/antivirus
+            *.cache-from=type=local,src=/tmp/cache/fetchmail
+            *.cache-from=type=local,src=/tmp/cache/resolver
+            *.cache-from=type=local,src=/tmp/cache/traefik-certdumper
+            *.cache-from=type=local,src=/tmp/cache/webdav
             *.platform=${{ inputs.architecture }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
