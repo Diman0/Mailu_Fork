@@ -188,17 +188,17 @@ jobs:
         with:
           path: /tmp/cache/admin
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-admin
-      - name: Configure /cache for image  smtp
+      - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/smtp
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
-      - name: Configure /cache for image
+          path: /tmp/cache/antispam
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-antispam
+      - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
           path: /tmp/cache/front
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-front
-      - name: Configure /cache for image
+      - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
           path: /tmp/cache/imap
@@ -324,17 +324,17 @@ jobs:
         with:
           path: /tmp/cache/admin
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-admin
-      - name: Configure /cache for image  smtp
+      - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/smtp
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
-      - name: Configure /cache for image
+          path: /tmp/cache/antispam
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-antispam
+      - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
           path: /tmp/cache/front
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-front
-      - name: Configure /cache for image
+      - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
           path: /tmp/cache/imap
@@ -446,17 +446,17 @@ jobs:
         with:
           path: /tmp/cache/admin
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-admin
-      - name: Configure /cache for image  smtp
+      - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/smtp
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
-      - name: Configure /cache for image
+          path: /tmp/cache/antispam
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-antispam
+      - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
           path: /tmp/cache/front
           key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-front
-      - name: Configure /cache for image
+      - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
           path: /tmp/cache/imap
