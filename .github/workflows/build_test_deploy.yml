@@ -112,7 +112,7 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-      - name: Configure /cache folder for storing tar.gz of cache
+      - name: Configure actions/cache@v3 action for storing build cache in the /tmp/cache folder
         uses: actions/cache@v3
         with:
           path: /tmp/cache/${{ matrix.target }}
@@ -178,72 +178,72 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/cache/docs
-          key: ${{ github.ref }}-${{ inputs.architecture }}--docs
+          key: ${{ github.ref }}-${{ inputs.architecture }}-docs
       - name: Configure /cache for image setup
         uses: actions/cache@v3
         with:
           path: /tmp/cache/setup
-          key: ${{ github.ref }}-${{ inputs.architecture }}--setup
+          key: ${{ github.ref }}-${{ inputs.architecture }}-setup
       - name: Configure /cache for image admin
         uses: actions/cache@v3
         with:
           path: /tmp/cache/admin
-          key: ${{ github.ref }}-${{ inputs.architecture }}--admin
+          key: ${{ github.ref }}-${{ inputs.architecture }}-admin
       - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
           path: /tmp/cache/antispam
-          key: ${{ github.ref }}-${{ inputs.architecture }}--antispam
+          key: ${{ github.ref }}-${{ inputs.architecture }}-antispam
       - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
           path: /tmp/cache/front
-          key: ${{ github.ref }}-${{ inputs.architecture }}--front
+          key: ${{ github.ref }}-${{ inputs.architecture }}-front
       - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
           path: /tmp/cache/imap
-          key: ${{ github.ref }}-${{ inputs.architecture }}--imap
+          key: ${{ github.ref }}-${{ inputs.architecture }}-imap
       - name: Configure /cache for image smtp
         uses: actions/cache@v3
         with:
           path: /tmp/cache/smtp
-          key: ${{ github.ref }}-${{ inputs.architecture }}--smtp
+          key: ${{ github.ref }}-${{ inputs.architecture }}-smtp
       - name: Configure /cache for image snappymail
         uses: actions/cache@v3
         with:
           path: /tmp/cache/snappymail
-          key: ${{ github.ref }}-${{ inputs.architecture }}--snappymail
+          key: ${{ github.ref }}-${{ inputs.architecture }}-snappymail
       - name: Configure /cache for image roundcube
         uses: actions/cache@v3
         with:
           path: /tmp/cache/roundcube
-          key: ${{ github.ref }}-${{ inputs.architecture }}--roundcube
+          key: ${{ github.ref }}-${{ inputs.architecture }}-roundcube
       - name: Configure /cache for image antivirus
         uses: actions/cache@v3
         with:
           path: /tmp/cache/antivirus
-          key: ${{ github.ref }}-${{ inputs.architecture }}--antivirus
+          key: ${{ github.ref }}-${{ inputs.architecture }}-antivirus
       - name: Configure /cache for image fetchmail
         uses: actions/cache@v3
         with:
           path: /tmp/cache/fetchmail
-          key: ${{ github.ref }}-${{ inputs.architecture }}--fetchmail
+          key: ${{ github.ref }}-${{ inputs.architecture }}-fetchmail
       - name: Configure /cache for image resolver
         uses: actions/cache@v3
         with:
           path: /tmp/cache/resolver
-          key: ${{ github.ref }}-${{ inputs.architecture }}--resolver
+          key: ${{ github.ref }}-${{ inputs.architecture }}-resolver
       - name: Configure /cache for image traefik-certdumper
         uses: actions/cache@v3
         with:
           path: /tmp/cache/traefik-certdumper
-          key: ${{ github.ref }}-${{ inputs.architecture }}--traefik-certdumper
+          key: ${{ github.ref }}-${{ inputs.architecture }}-traefik-certdumper
       - name: Configure /cache for image webdav
         uses: actions/cache@v3
         with:
           path: /tmp/cache/webdav
-          key: ${{ github.ref }}-${{ inputs.architecture }}--webdav
+          key: ${{ github.ref }}-${{ inputs.architecture }}-webdav
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -314,72 +314,72 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/cache/docs
-          key: ${{ github.ref }}-${{ inputs.architecture }}--docs
+          key: ${{ github.ref }}-${{ inputs.architecture }}-docs
       - name: Configure /cache for image setup
         uses: actions/cache@v3
         with:
           path: /tmp/cache/setup
-          key: ${{ github.ref }}-${{ inputs.architecture }}--setup
+          key: ${{ github.ref }}-${{ inputs.architecture }}-setup
       - name: Configure /cache for image admin
         uses: actions/cache@v3
         with:
           path: /tmp/cache/admin
-          key: ${{ github.ref }}-${{ inputs.architecture }}--admin
+          key: ${{ github.ref }}-${{ inputs.architecture }}-admin
       - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
           path: /tmp/cache/antispam
-          key: ${{ github.ref }}-${{ inputs.architecture }}--antispam
+          key: ${{ github.ref }}-${{ inputs.architecture }}-antispam
       - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
           path: /tmp/cache/front
-          key: ${{ github.ref }}-${{ inputs.architecture }}--front
+          key: ${{ github.ref }}-${{ inputs.architecture }}-front
       - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
           path: /tmp/cache/imap
-          key: ${{ github.ref }}-${{ inputs.architecture }}--imap
+          key: ${{ github.ref }}-${{ inputs.architecture }}-imap
       - name: Configure /cache for image smtp
         uses: actions/cache@v3
         with:
           path: /tmp/cache/smtp
-          key: ${{ github.ref }}-${{ inputs.architecture }}--smtp
+          key: ${{ github.ref }}-${{ inputs.architecture }}-smtp
       - name: Configure /cache for image snappymail
         uses: actions/cache@v3
         with:
           path: /tmp/cache/snappymail
-          key: ${{ github.ref }}-${{ inputs.architecture }}--snappymail
+          key: ${{ github.ref }}-${{ inputs.architecture }}-snappymail
       - name: Configure /cache for image roundcube
         uses: actions/cache@v3
         with:
           path: /tmp/cache/roundcube
-          key: ${{ github.ref }}-${{ inputs.architecture }}--roundcube
+          key: ${{ github.ref }}-${{ inputs.architecture }}-roundcube
       - name: Configure /cache for image antivirus
         uses: actions/cache@v3
         with:
           path: /tmp/cache/antivirus
-          key: ${{ github.ref }}-${{ inputs.architecture }}--antivirus
+          key: ${{ github.ref }}-${{ inputs.architecture }}-antivirus
       - name: Configure /cache for image fetchmail
         uses: actions/cache@v3
         with:
           path: /tmp/cache/fetchmail
-          key: ${{ github.ref }}-${{ inputs.architecture }}--fetchmail
+          key: ${{ github.ref }}-${{ inputs.architecture }}-fetchmail
       - name: Configure /cache for image resolver
         uses: actions/cache@v3
         with:
           path: /tmp/cache/resolver
-          key: ${{ github.ref }}-${{ inputs.architecture }}--resolver
+          key: ${{ github.ref }}-${{ inputs.architecture }}-resolver
       - name: Configure /cache for image traefik-certdumper
         uses: actions/cache@v3
         with:
           path: /tmp/cache/traefik-certdumper
-          key: ${{ github.ref }}-${{ inputs.architecture }}--traefik-certdumper
+          key: ${{ github.ref }}-${{ inputs.architecture }}-traefik-certdumper
       - name: Configure /cache for image webdav
         uses: actions/cache@v3
         with:
           path: /tmp/cache/webdav
-          key: ${{ github.ref }}-${{ inputs.architecture }}--webdav
+          key: ${{ github.ref }}-${{ inputs.architecture }}-webdav
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -436,72 +436,72 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/cache/docs
-          key: ${{ github.ref }}-${{ inputs.architecture }}--docs
+          key: ${{ github.ref }}-${{ inputs.architecture }}-docs
       - name: Configure /cache for image setup
         uses: actions/cache@v3
         with:
           path: /tmp/cache/setup
-          key: ${{ github.ref }}-${{ inputs.architecture }}--setup
+          key: ${{ github.ref }}-${{ inputs.architecture }}-setup
       - name: Configure /cache for image admin
         uses: actions/cache@v3
         with:
           path: /tmp/cache/admin
-          key: ${{ github.ref }}-${{ inputs.architecture }}--admin
+          key: ${{ github.ref }}-${{ inputs.architecture }}-admin
       - name: Configure /cache for image antispam
         uses: actions/cache@v3
         with:
           path: /tmp/cache/antispam
-          key: ${{ github.ref }}-${{ inputs.architecture }}--antispam
+          key: ${{ github.ref }}-${{ inputs.architecture }}-antispam
       - name: Configure /cache for image front
         uses: actions/cache@v3
         with:
           path: /tmp/cache/front
-          key: ${{ github.ref }}-${{ inputs.architecture }}--front
+          key: ${{ github.ref }}-${{ inputs.architecture }}-front
       - name: Configure /cache for image imap
         uses: actions/cache@v3
         with:
           path: /tmp/cache/imap
-          key: ${{ github.ref }}-${{ inputs.architecture }}--imap
+          key: ${{ github.ref }}-${{ inputs.architecture }}-imap
       - name: Configure /cache for image smtp
         uses: actions/cache@v3
         with:
           path: /tmp/cache/smtp
-          key: ${{ github.ref }}-${{ inputs.architecture }}--smtp
+          key: ${{ github.ref }}-${{ inputs.architecture }}-smtp
       - name: Configure /cache for image snappymail
         uses: actions/cache@v3
         with:
           path: /tmp/cache/snappymail
-          key: ${{ github.ref }}-${{ inputs.architecture }}--snappymail
+          key: ${{ github.ref }}-${{ inputs.architecture }}-snappymail
       - name: Configure /cache for image roundcube
         uses: actions/cache@v3
         with:
           path: /tmp/cache/roundcube
-          key: ${{ github.ref }}-${{ inputs.architecture }}--roundcube
+          key: ${{ github.ref }}-${{ inputs.architecture }}-roundcube
       - name: Configure /cache for image antivirus
         uses: actions/cache@v3
         with:
           path: /tmp/cache/antivirus
-          key: ${{ github.ref }}-${{ inputs.architecture }}--antivirus
+          key: ${{ github.ref }}-${{ inputs.architecture }}-antivirus
       - name: Configure /cache for image fetchmail
         uses: actions/cache@v3
         with:
           path: /tmp/cache/fetchmail
-          key: ${{ github.ref }}-${{ inputs.architecture }}--fetchmail
+          key: ${{ github.ref }}-${{ inputs.architecture }}-fetchmail
       - name: Configure /cache for image resolver
         uses: actions/cache@v3
         with:
           path: /tmp/cache/resolver
-          key: ${{ github.ref }}-${{ inputs.architecture }}--resolver
+          key: ${{ github.ref }}-${{ inputs.architecture }}-resolver
       - name: Configure /cache for image traefik-certdumper
         uses: actions/cache@v3
         with:
           path: /tmp/cache/traefik-certdumper
-          key: ${{ github.ref }}-${{ inputs.architecture }}--traefik-certdumper
+          key: ${{ github.ref }}-${{ inputs.architecture }}-traefik-certdumper
       - name: Configure /cache for image webdav
         uses: actions/cache@v3
         with:
           path: /tmp/cache/webdav
-          key: ${{ github.ref }}-${{ inputs.architecture }}--webdav
+          key: ${{ github.ref }}-${{ inputs.architecture }}-webdav
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
