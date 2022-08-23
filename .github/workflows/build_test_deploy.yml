@@ -112,15 +112,11 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-      - name: Create folder for storing build cache
-        run: |
-          sudo mkdir -p /cache
-          sudo chmod 777 /cache
       - name: Configure /cache folder for storing tar.gz of cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
-          path: /cache
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
+          path: /tmp/cache/{{ matrix.target }}
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-{{ matrix.target }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -145,8 +141,6 @@ jobs:
           set: |
             *.cache-to=type=local,dest=/tmp/cache/{{ matrix.target }},mode=max
             *.platform=${{ inputs.architecture }}
-      - name: Compress the cache folders to tar.gz
-        run: tar -cf /cache/cache.tar.gz /tmp/cache
 
 # This job runs all the tests.
   tests:
@@ -179,17 +173,76 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-      - name: Create folder for storing build cache
-        run: |
-          sudo mkdir -p /cache
-          sudo chmod 777 /cache
-      - name: Configure /cache folder for storing tar.gz of cache
-        uses: actions/cache@v2
+      - name: Configure /cache for image docs
+        uses: actions/cache@v3
         with:
-          path: /cache
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Compress the cache folders to tar.gz
-        run: tar -xf /cache/cache.tar.gz -C /tmp/cache
+          path: /tmp/cache/docs
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-docs
+      - name: Configure /cache for image setup
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/setup
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-setup
+      - name: Configure /cache for image admin
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/admin
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-admin
+      - name: Configure /cache for image  smtp
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/smtp
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
+      - name: Configure /cache for image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/front
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-front
+      - name: Configure /cache for image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/imap
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-imap
+      - name: Configure /cache for image smtp
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/smtp
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
+      - name: Configure /cache for image snappymail
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/snappymail
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-snappymail
+      - name: Configure /cache for image roundcube
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/roundcube
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-roundcube
+      - name: Configure /cache for image antivirus
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/antivirus
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-antivirus
+      - name: Configure /cache for image fetchmail
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/fetchmail
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-fetchmail
+      - name: Configure /cache for image resolver
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/resolver
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-resolver
+      - name: Configure /cache for image traefik-certdumper
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/traefik-certdumper
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-traefik-certdumper
+      - name: Configure /cache for image webdav
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/webdav
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-webdav
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -256,17 +309,76 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-      - name: Create folder for storing build cache
-        run: |
-          sudo mkdir -p /cache
-          sudo chmod 777 /cache
-      - name: Configure /cache folder for storing tar.gz of cache
-        uses: actions/cache@v2
+      - name: Configure /cache for image docs
+        uses: actions/cache@v3
         with:
-          path: /cache
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Compress the cache folders to tar.gz
-        run: tar -xf /cache/cache.tar.gz -C /tmp/cache
+          path: /tmp/cache/docs
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-docs
+      - name: Configure /cache for image setup
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/setup
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-setup
+      - name: Configure /cache for image admin
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/admin
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-admin
+      - name: Configure /cache for image  smtp
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/smtp
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
+      - name: Configure /cache for image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/front
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-front
+      - name: Configure /cache for image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/imap
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-imap
+      - name: Configure /cache for image smtp
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/smtp
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
+      - name: Configure /cache for image snappymail
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/snappymail
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-snappymail
+      - name: Configure /cache for image roundcube
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/roundcube
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-roundcube
+      - name: Configure /cache for image antivirus
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/antivirus
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-antivirus
+      - name: Configure /cache for image fetchmail
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/fetchmail
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-fetchmail
+      - name: Configure /cache for image resolver
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/resolver
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-resolver
+      - name: Configure /cache for image traefik-certdumper
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/traefik-certdumper
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-traefik-certdumper
+      - name: Configure /cache for image webdav
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/webdav
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-webdav
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -319,17 +431,76 @@ jobs:
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
           echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
-      - name: Create folder for storing build cache
-        run: |
-          sudo mkdir -p /cache
-          sudo chmod 777 /cache
-      - name: Configure /cache folder for storing tar.gz of cache
-        uses: actions/cache@v2
+      - name: Configure /cache for image docs
+        uses: actions/cache@v3
         with:
-          path: /cache
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}
-      - name: Compress the cache folders to tar.gz
-        run: tar -xf /cache/cache.tar.gz -C /tmp/cache
+          path: /tmp/cache/docs
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-docs
+      - name: Configure /cache for image setup
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/setup
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-setup
+      - name: Configure /cache for image admin
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/admin
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-admin
+      - name: Configure /cache for image  smtp
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/smtp
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
+      - name: Configure /cache for image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/front
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-front
+      - name: Configure /cache for image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/imap
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-imap
+      - name: Configure /cache for image smtp
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/smtp
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-smtp
+      - name: Configure /cache for image snappymail
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/snappymail
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-snappymail
+      - name: Configure /cache for image roundcube
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/roundcube
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-roundcube
+      - name: Configure /cache for image antivirus
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/antivirus
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-antivirus
+      - name: Configure /cache for image fetchmail
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/fetchmail
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-fetchmail
+      - name: Configure /cache for image resolver
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/resolver
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-resolver
+      - name: Configure /cache for image traefik-certdumper
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/traefik-certdumper
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-traefik-certdumper
+      - name: Configure /cache for image webdav
+        uses: actions/cache@v3
+        with:
+          path: /tmp/cache/webdav
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-webdav
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
