@@ -115,8 +115,8 @@ jobs:
       - name: Configure /cache folder for storing tar.gz of cache
         uses: actions/cache@v3
         with:
-          path: /tmp/cache/{{ matrix.target }}
-          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-{{ matrix.target }}
+          path: /tmp/cache/${{ matrix.target }}
+          key: ${{ env.BRANCH }}-${{ github.run_id }}-${{ github.run_number }}-${{ matrix.target }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - uses: crazy-max/ghaction-github-runtime@v2
@@ -139,7 +139,7 @@ jobs:
           load: false
           push: false
           set: |
-            *.cache-to=type=local,dest=/tmp/cache/{{ matrix.target }},mode=max
+            *.cache-to=type=local,dest=/tmp/cache/${{ matrix.target }},mode=max
             *.platform=${{ inputs.architecture }}
 
 # This job runs all the tests.
