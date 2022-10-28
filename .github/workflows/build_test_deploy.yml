@@ -353,10 +353,10 @@ jobs:
       - name: Push image to Docker
         shell: bash
         run: |
-          if [ '${{ env.MAILU_VERSION }}' == 'master' ]; then pinned_mailu_version='master'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
+          if [ '${{ env.MAILU_VERSION }}' == 'master-arm' ]; then pinned_mailu_version='master-arm'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
           docker buildx imagetools create \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
-            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:pinned_mailu_version \
+            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{pinned_mailu_version }} \
             ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}
 
   deploy-arm:
@@ -400,7 +400,7 @@ jobs:
           if [ '${{ env.MAILU_VERSION }}' == 'master-arm' ]; then pinned_mailu_version='master-arm'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
           docker buildx imagetools create \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
-            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:pinned_mailu_version \
+            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{pinned_mailu_version }} \
             ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
