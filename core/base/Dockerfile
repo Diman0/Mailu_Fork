@@ -40,9 +40,10 @@ COPY requirements-${MAILU_ENV}.txt ./
 COPY libs/ libs/
 
 RUN set -euxo pipefail \
-  ; machine="$(uname -m)" \
-  ; [[ "${machine}" == arm* || "${machine}" == aarch64 ]] && apk add --virtual .build-deps build-base gcc libffi-dev python3-dev \
-  ; [[ "${machine}" == armv7* ]] && apk add --virtual .build-deps cargo libressl-dev mariadb-connector-c-dev postgresql-dev \
+  ; machine="$(uname -m)"; deps="" \
+  ; [[ "${machine}" == arm* || "${machine}" == aarch64 ]] && deps="${deps} build-base gcc libffi-dev python3-dev" \
+  ; [[ "${machine}" == armv7* ]] && deps="${deps} cargo libressl-dev mariadb-connector-c-dev postgresql-dev" \
+  ; [[ "${deps}" ]] && apk add --virtual .build-deps ${deps} \
   ; pip install -r requirements-${MAILU_ENV}.txt \
   ; apk -e info -q .build-deps && apk del -r .build-deps \
   ; rm -rf /root/.cache /tmp/*.pem
