@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import logging as log
@@ -9,10 +9,13 @@ args = os.environ.copy()
 
 log.basicConfig(stream=sys.stderr, level=args.get("LOG_LEVEL", "WARNING"))
 
+args['TLS_PERMISSIVE'] = str(args.get('TLS_PERMISSIVE')).lower() not in ('false', 'no')
+
 # Get the first DNS server
 with open("/etc/resolv.conf") as handle:
     content = handle.read().split()
-    args["RESOLVER"] = content[content.index("nameserver") + 1]
+    resolver = content[content.index("nameserver") + 1]
+    args["RESOLVER"] = f"[{resolver}]" if ":" in resolver else resolver
 
 args["ADMIN_ADDRESS"] = system.get_host_address_from_environment("ADMIN", "admin")
 args["ANTISPAM_WEBUI_ADDRESS"] = system.get_host_address_from_environment("ANTISPAM_WEBUI", "antispam:11334")

@@ -267,7 +267,7 @@ correct syntax. The following file names will be taken as override configuration
 - `Dovecot`_ - ``dovecot.conf`` in dovecot sub-directory;
 - `Nginx`_ - All ``*.conf`` files in the ``nginx`` sub-directory;
 - `Rspamd`_ - All files in the ``rspamd`` sub-directory.
-- Roundcube - All ``*.inc`` files in the ``roundcube`` sub directory.
+- `Roundcube`_ - All ``*.inc.php`` files in the ``roundcube`` sub directory.
 
 To override the root location (``/``) in Nginx ``WEBROOT_REDIRECT`` needs to be set to ``none`` in the env file (see :ref:`web settings <web_settings>`).
 
@@ -354,10 +354,11 @@ How do I use webdav (radicale)?
 *issue reference:* `1591`_.
 
 
-.. _`Postfix`: http://www.postfix.org/postconf.5.html
-.. _`Dovecot`: https://doc.dovecot.org/configuration_manual/config_file/config_file_syntax/
-.. _`NGINX`:   https://nginx.org/en/docs/
-.. _`Rspamd`:  https://www.rspamd.com/doc/configuration/index.html
+.. _`Postfix`:   http://www.postfix.org/postconf.5.html
+.. _`Dovecot`:   https://doc.dovecot.org/configuration_manual/config_file/config_file_syntax/
+.. _`NGINX`:     https://nginx.org/en/docs/
+.. _`Rspamd`:    https://www.rspamd.com/doc/configuration/index.html
+.. _`Roundcube`: https://github.com/roundcube/roundcubemail/wiki/Configuration#customize-the-look
 
 .. _`Docker swarm howto`: https://github.com/Mailu/Mailu/tree/master/docs/swarm/master
 .. _`125`: https://github.com/Mailu/Mailu/issues/125
@@ -735,6 +736,7 @@ If you already have an existing mailbox and want Mailu to learn them all as ham 
 .. code-block:: bash
 
   rspamc -h antispam:11334 -P mailu -f 13 fuzzy_add /mail/user\@example.com/.Ham_Learn/cur/
+  rspamc -h antispam:11334 -P mailu learn_ham /mail/user\@example.com/.Ham_Learn/cur/
 
 This should learn every file located in the ``Ham_Learn`` folder from user@example.com 
 
@@ -743,6 +745,7 @@ Likewise, to lean all messages within the folder ``Spam_Learn`` as spam messages
 .. code-block:: bash
 
   rspamc -h antispam:11334 -P mailu -f 11 fuzzy_add /mail/user\@example.com/.Spam_Learn/cur/
+  rspamc -h antispam:11334 -P mailu learn_spam /mail/user\@example.com/.Spam_Learn/cur/
 
 *Issue reference:* `1438`_.
 
