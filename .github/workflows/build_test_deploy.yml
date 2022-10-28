@@ -353,7 +353,7 @@ jobs:
       - name: Push image to Docker
         shell: bash
         run: |
-          if [ '${{ env.MAILU_VERSION }}' == 'master-arm' ]; then pinned_mailu_version='master-arm'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
+          if [ '${{ env.MAILU_VERSION }}' == 'master' ]; then pinned_mailu_version='master'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
           docker buildx imagetools create \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
