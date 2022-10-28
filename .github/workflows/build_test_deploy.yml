@@ -118,7 +118,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: string
+      - name: Helper to convert docker org to lowercase
+        id: string
         uses: ASzc/change-string-case-action@v2
         with:
           string: ${{ github.repository_owner }}
@@ -174,7 +175,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: string
+      - name: Helper to convert docker org to lowercase
+        id: string
         uses: ASzc/change-string-case-action@v2
         with:
           string: ${{ github.repository_owner }}
@@ -231,7 +233,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: string
+      - name: Helper to convert docker org to lowercase
+        id: string
         uses: ASzc/change-string-case-action@v2
         with:
           string: ${{ github.repository_owner }}
@@ -295,7 +298,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: string
+      - name: Helper to convert docker org to lowercase
+        id: string
         uses: ASzc/change-string-case-action@v2
         with:
           string: ${{ github.repository_owner }}
@@ -341,7 +345,8 @@ jobs:
         with:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
-      - id: string
+      - name: Helper to convert docker org to lowercase
+        id: string
         uses: ASzc/change-string-case-action@v2
         with:
           string: ${{ github.repository_owner }}
@@ -382,16 +387,19 @@ jobs:
         with:
           username: ${{ secrets.Docker_Login }}
           password: ${{ secrets.Docker_Password }}
-      - id: string
+      - name: Helper to convert docker org to lowercase
+        id: string
         uses: ASzc/change-string-case-action@v2
         with:
           string: ${{ github.repository_owner }}
       - name: Push image to Docker
+        shell: bash
         run: |
+          if [ '${{ env.MAILU_VERSION }}' == 'master' ]; then pinned_mailu_version='master'; else pinned_mailu_version=${{ env.PINNED_MAILU_VERSION}}; fi;
           docker buildx imagetools create \
-            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ inputs.mailu_version }} \
-            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ inputs.pinned_mailu_version }} \
-            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ inputs.mailu_version }}
+            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
+            --tag ${{ inputs.docker_org }}/${{ matrix.target }}:pinned_mailu_version \
+            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:
