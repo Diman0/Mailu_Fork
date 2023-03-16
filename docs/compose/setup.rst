@@ -41,7 +41,7 @@ values:
 .. note::
 
   When using *Letsencrypt!* you have to make sure that the DNS ``A`` and ``AAAA`` records for the
-  all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip adresses of you server.
+  all hostnames mentioned in the ``HOSTNAMES`` variable match with the ip addresses of you server.
   Or else certificate generation will fail! See also: :ref:`dns_setup`.
 
 Bind address
@@ -95,7 +95,7 @@ You may now start Mailu. Move the to the Mailu directory and run:
 
 .. code-block:: bash
 
-  docker-compose up -d
+  docker compose up -d
 
 Finally, you need an admin user account. 
 
@@ -106,7 +106,7 @@ Else, if you don't go with the automatic way, you need to manually create the ad
 
 .. code-block:: bash
 
-  docker-compose exec admin flask mailu admin me example.net 'password'
+  docker compose exec admin flask mailu admin me example.net 'password'
 
 This will create a user named ``me@example.net`` with password ``password`` and administration privileges.
 Connect to the Web admin interface and change the password to a strong one.

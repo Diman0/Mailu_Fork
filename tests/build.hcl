@@ -34,10 +34,10 @@ group "default" {
     "antispam",
     "front",
     "imap",
+    "oletools",
     "smtp",
 
-    "snappymail",
-    "roundcube",
+    "webmail",
 
     "antivirus",
     "fetchmail",
@@ -107,6 +107,9 @@ target "docs" {
 target "setup" {
   inherits = ["defaults"]
   context = "setup/"
+  contexts = {
+    base = "target:base"
+  }
   tags = tag("setup")
 }
 
@@ -150,6 +153,15 @@ target "front" {
   tags = tag("nginx")
 }
 
+target "oletools" {
+  inherits = ["defaults"]
+  context = "core/oletools/"
+  contexts = {
+    base = "target:base"
+  }
+  tags = tag("oletools")
+}
+
 target "imap" {
   inherits = ["defaults"]
   context = "core/dovecot/"
@@ -169,18 +181,15 @@ target "smtp" {
 }
 
 # -----------------------------------------------------------------------------------------
-# Webmail images
+# Webmail image
 # -----------------------------------------------------------------------------------------
-target "snappymail" {
+target "webmail" {
   inherits = ["defaults"]
-  context = "webmails/snappymail/"
-  tags = tag("snappymail")
-}
-
-target "roundcube" {
-  inherits = ["defaults"]
-  context = "webmails/roundcube/"
-  tags = tag("roundcube")
+  context = "webmails/"
+  contexts = {
+    base = "target:base"
+  }
+  tags = tag("webmail")
 }
 
 # -----------------------------------------------------------------------------------------
