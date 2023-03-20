@@ -42,7 +42,7 @@ jobs:
             pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | cut -d. -f1 | xargs -0I % echo "issue=%" >> $GITHUB_OUTPUT && popd
             pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -0I % echo "content=%" >> $GITHUB_OUTPUT && popd
       - name: Construct message for release
-        id: message
+        shell: bash
         env:
           issue: "${{ steps.changelog.outputs.issue }}"
           changelog: "${{ steps.changelog.outputs.content }}"
@@ -57,11 +57,15 @@ jobs:
             This release was triggered by PR/Issue [${{ env.issue }}](https://github.com/Mailu/Mailu/issues/${{ env.issue }}).
             
             The release notes of the original main release can be accessed via menu item 'Release notes' on [mailu.io](https://mailu.io/).
-            " && echo "body=$message" >> GITHUB_OUTPUT       
+            " && echo "$message" >> release_note.md       
+      - name: Show release note
+        shell: bash
+        run: |
+            cat release_note.md
       - name: Create release for tag x.y.z.
         uses: ncipollo/release-action@v1
         env:
-          BODY: ${{ steps.message.outputs.body }}
+          bodyFile: "release_note.md"
         with:
           body: "${{ env.BODY }}"
           tag: ${{ env.PINNED_MAILU_VERSION }}
