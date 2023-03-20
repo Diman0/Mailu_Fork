@@ -64,13 +64,13 @@ jobs:
       - name: Get latest changelog
         id: changelog
         run: |
-            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | cut -d. -f1 | xargs -I % echo issue=% >> $GITHUB_OUTPUT && popd
-            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -I % echo content=% >> $GITHUB_OUTPUT && popd
+            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | cut -d. -f1 | xargs -I % echo "issue=%" >> $GITHUB_OUTPUT && popd
+            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -I % echo "content=%" >> $GITHUB_OUTPUT && popd
       - name: Construct message for release
         id: message
         env:
-          issue: ${{ steps.changelog.outputs.issue }}
-          changelog: ${{ steps.changelog.outputs.content }}
+          issue: "${{ steps.changelog.outputs.issue }}"
+          changelog: "${{ steps.changelog.outputs.content }}"
         run: |
             message=$(cat << EOM
             This is a new automatic release of Mailu. The new version can be seen in the tag name.
