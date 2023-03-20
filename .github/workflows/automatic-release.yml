@@ -64,9 +64,7 @@ jobs:
             cat release_note.md
       - name: Create release for tag x.y.z.
         uses: ncipollo/release-action@v1
-        env:
-          bodyFile: "release_note.md"
         with:
-          body: "${{ env.BODY }}"
+          bodyFile: "release_note.md"
           tag: ${{ env.PINNED_MAILU_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
