@@ -55,15 +55,15 @@ jobs:
             Changelog:
             ${{ env.changelog }}
             
-            This release was triggered by PR/Issue [{{ env.issue }}](https://github.com/Mailu/Mailu/issues/{{ env.issue }}).
+            This release was triggered by PR/Issue [${{ env.issue }}](https://github.com/Mailu/Mailu/issues/${{ env.issue }}).
             
             The release notes of the original main release can be accessed via menu item 'Release notes' on [mailu.io](https://mailu.io/).
-            EOM) && echo message="$message" >> GITHUB_OUTPUT        
+            EOM) && echo "message=$message" >> GITHUB_OUTPUT        
       - name: Create release for tag x.y.z.
         uses: ncipollo/release-action@v1
         env:
           BODY: ${{ steps.message.outputs.message }}
         with:
-          body: ${{ env.BODY }}
+          body: "${{ env.BODY }}"
           tag: ${{ env.PINNED_MAILU_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
