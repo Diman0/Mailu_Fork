@@ -1,0 +1,94 @@
+name: test-automatic-release
+on:
+  workflow_dispatch:
+    inputs:
+      architecture:
+        description: 'The architecture(s) of the images that will be build. linux/amd64 or linux/arm64/v8,linux/arm/v7 or linux/amd64,linux/arm64/v8,linux/arm/v7'
+        required: false
+        default: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
+        type: string
+      mailu_version:
+        description: 'The main version that is build. E.g. master or x.y.'
+        required: true
+        type: string
+      pinned_mailu_version:
+        description: 'The specific version that is build. E.g. commit hash or x.y.z.'
+        required: true
+        type: string
+      docker_org:
+        description: 'The docker organisation where the images are pushed to. E.g. ghcr.io/mailu'
+        required: true
+        type: string
+      branch:
+        description: 'The branch that triggered this workflow.'
+        required: true
+        type: string
+      deploy:
+        description: Deploy to container registry. Happens for all branches but staging. Use string true or false.
+        default: true
+        required: false
+        type: string
+      release:
+        description: Tag and create the github release. Use string true or false.
+        default: false
+        required: false
+        type: string
+
+concurrency: ci-release-${{ github.ref }}
+
+jobs:
+# This job calculates all global job variables that are required by all the subsequent jobs.
+# All subsequent jobs will retrieve and use these variables. This way the variables only have to be derived once.
+
+#This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # fetch-depth 0 is required to also retrieve all tags.
+          fetch-depth: 0
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Create tag for branch x.y.
+        shell: bash
+        run: |
+          echo git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
+          git tag ${{ env.PINNED_MAILU_VERSION }} $(/usr/bin/git rev-parse HEAD)
+          git push origin ${{ env.PINNED_MAILU_VERSION }}
+      - name: Get latest changelog
+        id: changelog
+        run: |
+            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | cut -d. -f1 | xargs -I % echo issue=% >> $GITHUB_OUTPUT && popd
+            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -I % echo content=% >> $GITHUB_OUTPUT && popd
+      - name: Construct message for release
+        id: message
+        env:
+          issue: ${{ steps.changelog.outputs.issue }}
+          changelog: ${{ steps.changelog.outputs.content }}
+        run: |
+            message=$(cat << EOM
+            This is a new automatic release of Mailu. The new version can be seen in the tag name.
+            The main version X.Y (e.g. 1.9) will always reflect the latest version of the branch. To update your Mailu installation simply pull the latest images `docker compose pull && docker compose up -d`.
+            The pinned version X.Y.Z (e.g. 1.9.1) is not updated. It is pinned to the commit that was used for creating this release. You can use a pinned version to make sure your Mailu installation is not suddenly updated when recreating containers. The pinned version allows the user to manually update. It also allows to go back to a previous pinned version.
+
+            Changelog:
+            ${{ env.changelog }}
+            
+            This release was triggered by PR/Issue [{{ env.issue }}](https://github.com/Mailu/Mailu/issues/{{ env.issue }}).
+            
+            The release notes of the original main release can be accessed via menu item 'Release notes' on [mailu.io](https://mailu.io/).
+            EOM) && echo message="$message" >> GITHUB_OUTPUT        
+      - name: Create release for tag x.y.z.
+        uses: ncipollo/release-action@v1
+        env:
+          BODY: ${{ steps.message.outputs.message }}
+        with:
+          body: ${{ env.BODY }}
+          tag: ${{ env.PINNED_MAILU_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
