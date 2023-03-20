@@ -2,11 +2,6 @@ name: test-automatic-release
 on:
   workflow_dispatch:
     inputs:
-      architecture:
-        description: 'The architecture(s) of the images that will be build. linux/amd64 or linux/arm64/v8,linux/arm/v7 or linux/amd64,linux/arm64/v8,linux/arm/v7'
-        required: false
-        default: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
-        type: string
       mailu_version:
         description: 'The main version that is build. E.g. master or x.y.'
         required: true
@@ -14,24 +9,6 @@ on:
       pinned_mailu_version:
         description: 'The specific version that is build. E.g. commit hash or x.y.z.'
         required: true
-        type: string
-      docker_org:
-        description: 'The docker organisation where the images are pushed to. E.g. ghcr.io/mailu'
-        required: true
-        type: string
-      branch:
-        description: 'The branch that triggered this workflow.'
-        required: true
-        type: string
-      deploy:
-        description: Deploy to container registry. Happens for all branches but staging. Use string true or false.
-        default: true
-        required: false
-        type: string
-      release:
-        description: Tag and create the github release. Use string true or false.
-        default: false
-        required: false
         type: string
 
 concurrency: ci-release-${{ github.ref }}
@@ -51,10 +28,8 @@ jobs:
       - name: Retrieve global variables
         shell: bash
         run: |
-          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
           echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
           echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
-          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
       - name: Create tag for branch x.y.
         shell: bash
         run: |
@@ -64,8 +39,8 @@ jobs:
       - name: Get latest changelog
         id: changelog
         run: |
-            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | cut -d. -f1 | xargs -I % echo "issue=%" >> $GITHUB_OUTPUT && popd
-            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -I % echo "content=%" >> $GITHUB_OUTPUT && popd
+            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | cut -d. -f1 | xargs -0I % echo "issue=%" >> $GITHUB_OUTPUT && popd
+            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -0I % echo "content=%" >> $GITHUB_OUTPUT && popd
       - name: Construct message for release
         id: message
         env:
