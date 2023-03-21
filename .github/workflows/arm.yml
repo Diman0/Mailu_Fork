@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - '1.9'
-      - master
+      - master2
 
 concurrency: ci-arm-${{ github.ref }}
 
