@@ -5,7 +5,7 @@ on:
       - testing
       - staging
       - '1.9'
-      - master
+      - master2
 
 concurrency: ci-x64-${{ github.ref }}
 
