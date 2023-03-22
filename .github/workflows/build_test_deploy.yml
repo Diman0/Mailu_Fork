@@ -145,9 +145,10 @@ jobs:
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 5
+          timeout_minutes: 10
           retry_wait_seconds: 30
           max_attempts: 3
           shell: bash
@@ -210,9 +211,10 @@ jobs:
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN2: ${{ secrets.Docker_Login }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 10
+          timeout_minutes: 15
           retry_wait_seconds: 30
           max_attempts: 10
           shell: bash
@@ -284,9 +286,10 @@ jobs:
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN: ${{ secrets.Docker_Login }}
           DOCKER_PASSW: ${{ secrets.Docker_Password }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 5
+          timeout_minutes: 10
           retry_wait_seconds: 30
           max_attempts: 3
           shell: bash
@@ -356,9 +359,10 @@ jobs:
           BUILDER: ${{ steps.uuid.outputs.uuid }}
           DOCKER_LOGIN2: ${{ secrets.Docker_Login }}
           DOCKER_PASSW2: ${{ secrets.Docker_Password }}
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 10
+          timeout_minutes: 15
           retry_wait_seconds: 30
           max_attempts: 10
           shell: bash
