@@ -436,6 +436,63 @@ jobs:
           MAILU_VERSION: ${{ env.MAILU_VERSION }}-build
           PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build
 
+# This job runs all the tests.
+  tests-arm:
+    name: tests-arm
+    if: contains(inputs.architecture, 'linux/amd64')
+    runs-on: ubuntu-latest
+    permissions:
+     contents: read
+     packages: read
+    needs:
+      - build-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["core", "fetchmail", "filters", "webmail", "webdav"]
+        time: ["2"]
+        include:
+          - target: "filters"
+            time: "3"
+        exclude:
+          - target: "filters"
+            time: "2"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retrieve global variables
+        shell: bash
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "MAILU_VERSION=${{ inputs.mailu_version }}" >> $GITHUB_ENV
+          echo "PINNED_MAILU_VERSION=${{ inputs.pinned_mailu_version }}" >> $GITHUB_ENV
+          echo "DOCKER_ORG=${{ inputs.docker_org }}" >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - uses: crazy-max/ghaction-github-runtime@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Helper to convert docker org to lowercase
+        id: string
+        uses: ASzc/change-string-case-action@v5
+        with:
+          string: ${{ github.repository_owner }}
+      - name: Install python packages
+        run: python3 -m pip install -r tests/requirements.txt
+      - name: Copy all certs
+        run: sudo -- sh -c 'mkdir -p /mailu && cp -r tests/certs /mailu && chmod 600 /mailu/certs/*'
+      - name: Test ${{ matrix.target }}
+        run: python tests/compose/test.py ${{ matrix.target }} ${{ matrix.time }}
+        env:
+          DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}-build-arm
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build-arm
+
   deploy:
     name: Deploy images
     # Deploying is not required for staging
@@ -445,6 +502,7 @@ jobs:
       - build
       - build-arm
       - tests
+      - tests-arm
     strategy:
       fail-fast: false
       matrix:
