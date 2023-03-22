@@ -148,7 +148,7 @@ jobs:
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 10
+          timeout_minutes: 15
           retry_wait_seconds: 30
           max_attempts: 3
           shell: bash
@@ -214,7 +214,7 @@ jobs:
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 15
+          timeout_minutes: 30
           retry_wait_seconds: 30
           max_attempts: 10
           shell: bash
@@ -289,7 +289,7 @@ jobs:
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 10
+          timeout_minutes: 15
           retry_wait_seconds: 30
           max_attempts: 3
           shell: bash
@@ -362,7 +362,7 @@ jobs:
           BUILDX_NO_DEFAULT_ATTESTATIONS: 1
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 15
+          timeout_minutes: 30
           retry_wait_seconds: 30
           max_attempts: 10
           shell: bash
