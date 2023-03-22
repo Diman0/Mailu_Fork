@@ -495,7 +495,7 @@ jobs:
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}-build-arm
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build-arm
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-arm-build
 
   deploy:
     name: Deploy images
