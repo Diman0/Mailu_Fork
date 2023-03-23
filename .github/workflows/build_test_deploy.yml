@@ -351,8 +351,8 @@ jobs:
       - name: Build docker image with retry
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
-          MAILU_VERSION: ${{ env.MAILU_VERSION }}-arm-build
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-arm-build
+          MAILU_VERSION: ${{ env.MAILU_VERSION }}-build-arm
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build-arm
           LABEL_VERSION: ${{ env.MAILU_VERSION }}
           PINNED_LABEL_VERSION: ${{ env.PINNED_MAILU_VERSION }}
           ARCH: linux/arm64/v8,linux/arm/v7
@@ -443,8 +443,8 @@ jobs:
 # This job runs all the tests.
   tests-arm:
     name: tests-arm
-    if: contains(inputs.architecture, 'linux/amd64')
-    runs-on: ubuntu-latest
+    if: contains(inputs.architecture, 'linux/arm64/v8,linux/arm/v7')
+    runs-on: self-hosted
     permissions:
      contents: read
      packages: read
@@ -495,7 +495,7 @@ jobs:
         env:
           DOCKER_ORG: ghcr.io/${{ steps.string.outputs.lowercase }}
           MAILU_VERSION: ${{ env.MAILU_VERSION }}-build-arm
-          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-arm-build
+          PINNED_MAILU_VERSION: ${{ env.PINNED_MAILU_VERSION }}-build-arm
 
   deploy:
     name: Deploy images
@@ -546,7 +546,7 @@ jobs:
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:latest \
             ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build \
-            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-arm-build
+            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build-arm
       - name: Push x64 image to Github (ghcr.io)
         if: contains(inputs.architecture, 'linux/amd64') && !contains(inputs.architecture, 'linux/arm64/v8,linux/arm/v7')
         shell: bash
@@ -566,7 +566,7 @@ jobs:
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:${{ env.MAILU_VERSION }} \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:$pinned_mailu_version \
             --tag ${{ inputs.docker_org }}/${{ matrix.target }}:latest \
-            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-arm-build
+            ghcr.io/${{ steps.string.outputs.lowercase }}/${{ matrix.target }}:${{ env.MAILU_VERSION }}-build-arm
 
 #This job creates a tagged release. A tag is created for the pinned version x.y.z. The GH release refers to this tag.
   tag-release:
