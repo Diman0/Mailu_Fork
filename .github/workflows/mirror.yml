@@ -37,7 +37,8 @@ jobs:
           ; curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl \
           ; chmod 755 regctl \
           ; ./regctl image copy docker.io/alpine:"$TAG" "$DOCKER_ORG"/alpine:"$TAG" \
-          ; rm regctl
+          ; rm regctl \
+          ; docker logout --username "${{ github.repository_owner }}"
 
 #mirror redis image
   mirror-image-redis:
@@ -63,5 +64,5 @@ jobs:
           ; curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl \
           ; chmod 755 regctl \
           ; ./regctl image copy docker.io/redis:"$TAG" "$DOCKER_ORG"/redis:"$TAG" \
-          ; rm regctl
-        
+          ; rm regctl \
+          ; docker logout --username "${{ github.repository_owner }}"
