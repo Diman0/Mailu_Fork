@@ -19,6 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        #list of tags to mirror
         tag: ["3.17.2"]
     steps:
       - name: Helper to convert docker org to lowercase
@@ -46,6 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        #list of tags to mirror
         tag: ["7.0-alpine"]
     steps:
       - name: Helper to convert docker org to lowercase
