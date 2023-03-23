@@ -38,7 +38,7 @@ jobs:
           ; chmod 755 regctl \
           ; ./regctl image copy docker.io/alpine:"$TAG" "$DOCKER_ORG"/alpine:"$TAG" \
           ; rm regctl \
-          ; docker logout --username "${{ github.repository_owner }}"
+          ; docker logout ghcr.io
 
 #mirror redis image
   mirror-image-redis:
@@ -65,4 +65,4 @@ jobs:
           ; chmod 755 regctl \
           ; ./regctl image copy docker.io/redis:"$TAG" "$DOCKER_ORG"/redis:"$TAG" \
           ; rm regctl \
-          ; docker logout --username "${{ github.repository_owner }}"
+          ; docker logout ghcr.io
