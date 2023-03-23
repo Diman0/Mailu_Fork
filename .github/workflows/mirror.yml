@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: ["7.0"]
+        tag: ["7.0-alpine"]
     steps:
       - name: Helper to convert docker org to lowercase
         id: string
