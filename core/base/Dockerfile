@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile-upstream:1.4.3
 
 # base system image (intermediate)
-ARG DISTRO=alpine:3.17.2
+ARG DISTRO=ghcr.io/diman0/alpine:3.17.2
 FROM $DISTRO as system
 
 ENV TZ=Etc/UTC LANG=C.UTF-8
