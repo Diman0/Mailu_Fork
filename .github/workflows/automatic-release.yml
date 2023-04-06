@@ -48,7 +48,11 @@ jobs:
         shell: bash
         run: |
             pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | cut -d. -f1 | xargs -0I % echo "issue=%" >> $GITHUB_OUTPUT && popd
-            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -0I % echo "content=%" >> $GITHUB_OUTPUT && popd
+            pushd . && cd towncrier/newsfragments && ls -Art | tail -n 1 | xargs cat | xargs -0I % echo "content=%" && popd
+            content="${content//'%'/'%25'}"
+            content="${content//$'\n'/'%0A'}"
+            content="${content//$'\r'/'%0D'}"
+            echo "$content" >> $GITHUB_OUTPUT            
       - name: Construct message for release
         shell: bash
         env:
