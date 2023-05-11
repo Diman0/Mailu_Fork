@@ -35,8 +35,7 @@ def check_credentials(user, password, ip, protocol=None, auth_port=None):
     if auth_port in WEBMAIL_PORTS and password.startswith('token-'):
         if utils.verify_temp_token(user.get_id(), password):
             is_ok = True
-    # All tokens are 32 characters hex lowercase
-    if not is_ok and len(password) == 32:
+    if not is_ok and utils.is_app_token(password):
         for token in user.tokens:
             if (token.check_password(password) and
                 (not token.ip or token.ip == ip)):
@@ -85,6 +84,7 @@ def handle_authentication(headers):
         raw_user_email = urllib.parse.unquote(headers["Auth-User"])
         raw_password = urllib.parse.unquote(headers["Auth-Pass"])
         user_email = 'invalid'
+        password = 'invalid'
         try:
             user_email = raw_user_email.encode("iso8859-1").decode("utf8")
             password = raw_password.encode("iso8859-1").decode("utf8")
@@ -107,6 +107,7 @@ def handle_authentication(headers):
                         "Auth-Server": server,
                         "Auth-User": user_email,
                         "Auth-User-Exists": is_valid_user,
+                        "Auth-Password": password,
                         "Auth-Port": port
                     }
         status, code = get_status(protocol, "authentication")
@@ -115,6 +116,7 @@ def handle_authentication(headers):
             "Auth-Error-Code": code,
             "Auth-User": user_email,
             "Auth-User-Exists": is_valid_user,
+            "Auth-Password": password,
             "Auth-Wait": 0
         }
     # Unexpected

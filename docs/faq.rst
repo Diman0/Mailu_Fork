@@ -362,6 +362,8 @@ How do I use webdav (radicale)?
 .. _`575`: https://github.com/Mailu/Mailu/issues/575
 .. _`1591`: https://github.com/Mailu/Mailu/issues/1591
 
+.. _mta-sts:
+
 How do I setup a MTA-STS policy?
 ````````````````````````````````
 
@@ -392,6 +394,46 @@ Technical issues
 
 In this section we are trying to cover the most common problems our users are having.
 If your issue is not listed here, please consult issues with the `troubleshooting tag`_.
+
+.. _delete_users:
+
+How to delete users?
+````````````````````
+
+From the web administration interface, when a user is deleted, the user is only disabled. When a user is not enabled, this user:
+
+* cannot send/receive email
+* cannot access Mailu (admin/webmail)
+* cannot access the email box via pop3/imap
+
+It is not possible to delete users via the Mailu web administration interface. The main reason is to prevent email address reuse. If a user was deleted, it can be recreated and used by someone else. It is not clear that the email address has been used by someone else previously. This new user might receive emails which were meant for the previous user. Disabling the user, prevents the email address to be reused by mistake.
+
+Another reason is that extra post-deletion steps are required after a user has been deleted from the Mailu database. Those additional steps are:
+
+* Delete the dovecot mailbox. If this does not happen, a new user with the same email address reuses the previous user's mailbox.
+* Delete the user from the roundcube database (not required when SnappyMail is used). If this does not happen, a new user with the same email address reuses the previous roundcube data (such as address lists, gpg keys etc).
+
+For safely deleting the user data (and possible the user as well) a script has been introduced. The scripts provides the following information
+
+* commands for deleting mailboxes of unknown users. These users were deleted from Mailu, but still have their mailbox data on the file system.
+* commands for deleting mailboxes and roundcube data for disabled users.
+* commands for deleting users from the Mailu database.
+
+Proceed as following for deleting an user:
+
+1. Disable the to-be-deleted user. This can be done via the Web Administration interface (/admin), the Mailu CLI command user-delete, or the RESTful API. Do **not** delete the user.
+2. Download .\\scripts\\purge_user.sh from the `github project`_. Or clone the Mailu github project.
+3. Copy the script purge_user.sh to the Mailu folder that contains the `docker-compose.yml` file.
+4. Run as root: purge_user.sh
+5. The script will output the commands that can be used for fully purging each disabled user. It will show the instruction for deleting the user from the
+
+   * Dovecot maildir from filesystem (all email data)
+   * Roundcube database (all data saved in roundcube)
+   * Mailu database.
+
+6. Run the commands for deleting all user data for each disabled user.
+
+.. _`github project`: https://github.com/Mailu/Mailu/
 
 Changes in .env don't propagate
 ```````````````````````````````
@@ -539,12 +581,12 @@ down brute force attacks. The same applies to login attempts via the single sign
 We *do* provide a possibility to export the logs from the ``front`` service and ``Admin`` service to the host.
 The ``front`` container logs failed logon attempts on SMTP, IMAP and POP3.
 The ``Admin`` container logs failed logon attempt on the single sign on page.
-For this you need to set ``LOG_DRIVER=journald`` or ``syslog``, depending on the log
-manager of the host. You will need to setup the proper Regex in the Fail2Ban configuration.
+You will need to setup the proper Regex in the Fail2Ban configuration.
 Below an example how to do so.
 
 If you use a reverse proxy in front of Mailu, it is vital to set the environment variables REAL_IP_HEADER and REAL_IP_FROM.
 Without these environment variables, Mailu will not trust the remote client IP passed on by the reverse proxy and as a result your reverse proxy will be banned.
+
 See the :ref:`configuration reference <reverse_proxy_headers>` for more information.
 
 
@@ -833,3 +875,23 @@ We have seen a fair amount of support requests related to the following:
 - `coredns has a bug`_ that we have now worked around
 
 .. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
+
+How can I add more languages to roundcube's spellchecker?
+`````````````````````````````````````````````````````````
+
+If you are comfortable using an online spellchecker, the easiest is to configure the following via an override:
+
+.. code-block:: php
+
+   $config['spellcheck_engine'] = 'googie';
+   $config['spellcheck_ignore_caps'] = true;
+   $config['spellcheck_ignore_nums'] = true;
+   $config['spellcheck_dictionary'] = true;
+
+If not, you can download the `aspell dictionary`_ you require and place it in ``/usr/share/aspell/`` and then enable it by tweaking the following in the configuration file:
+
+.. code-block:: php
+
+   $config['spellcheck_languages'] = array('en'=>'English', ...);
+
+.. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
