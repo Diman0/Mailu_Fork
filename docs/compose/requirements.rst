@@ -26,11 +26,11 @@ Pick a distribution
 The mail server runs as a set of Docker containers, so it is almost operating
 system agnostic.
 
-Because most of our tests run on Debian Jessie and Debian Stretch, we recommend
+Because most of our tests run on Debian stable, we recommend
 one of these for the base system. Mailu should however be able to run on
 any of the `officially supported distributions`_.
 
-For the purpose of this guide, all examples are based on Debian Stretch. The
+For the purpose of this guide, all examples are based on Debian stable. The
 differences with other system will however hardly be noticeable.
 
 .. _`officially supported distributions`: https://docs.docker.com/engine/installation/
@@ -38,7 +38,7 @@ differences with other system will however hardly be noticeable.
 Install the distribution
 ------------------------
 
-First, install Debian Stretch from the *netinstall* CD image. When installing,
+First, install Debian stable from the *netinstall* CD image. When installing,
 make sure that you either:
 
  - setup a root *ext4* partition,
@@ -63,10 +63,11 @@ address for your mail server and that you have a dedicated hostname
 with forward and reverse DNS entries for this IP address.
 
 Also, your host must not listen on ports ``25``, ``80``, ``110``, ``143``,
-``443``, ``465``, ``587``, ``993`` or ``995`` as these are used by Mailu
+``443``, ``465``, ``587``, ``993``, ``995`` nor ``4190`` as these are used by Mailu
 services. Therefore, you should disable or uninstall any program that is
-listening on these ports (or have them listen on a different port). For
-instance, on a default Debian install:
+listening on these ports (or have them listen on a different port), and make sure
+that these ports are open in your firewall if you have one. For instance, on a
+default Debian install:
 
 .. code-block:: bash
 

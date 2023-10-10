@@ -13,7 +13,7 @@ concurrency: ci-multiarch-${{ github.ref }}
 # REQUIRED global variables
 # DOCKER_ORG, docker org used for pushing images.
 env:
-  DOCKER_ORG: ghcr.io/diman0
+  DOCKER_ORG: ghcr.io/mailu
 
 jobs:
 # This job calculates all global job variables that are required by all the subsequent jobs.
@@ -96,7 +96,7 @@ jobs:
       - derive-variables
     uses: ./.github/workflows/build_test_deploy.yml
     with:
-      architecture: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
+      architecture: 'linux/amd64'
       mailu_version: ${{needs.derive-variables.outputs.MAILU_VERSION}}
       pinned_mailu_version: ${{needs.derive-variables.outputs.PINNED_MAILU_VERSION}}
       docker_org: ${{needs.derive-variables.outputs.DOCKER_ORG}}

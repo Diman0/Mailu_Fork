@@ -75,7 +75,7 @@ class CommaSeparatedList(db.TypeDecorator):
     """ Stores a list as a comma-separated string, compatible with Postfix.
     """
 
-    impl = db.String(255)
+    impl = db.String(4096)
     cache_ok = True
     python_type = list
 
@@ -421,7 +421,7 @@ class Email(object):
         """ send an email to the address """
         try:
             f_addr = f'{app.config["POSTMASTER"]}@{idna.encode(app.config["DOMAIN"]).decode("ascii")}'
-            with smtplib.LMTP(host=app.config['IMAP_ADDRESS'], port=2525) as lmtp:
+            with smtplib.LMTP(host=app.config['FRONT_ADDRESS'], port=2525) as lmtp:
                 to_address = f'{self.localpart}@{idna.encode(self.domain_name).decode("ascii")}'
                 msg = text.MIMEText(body)
                 msg['Subject'] = subject
@@ -523,6 +523,7 @@ class User(Base, Email):
     spam_enabled = db.Column(db.Boolean, nullable=False, default=True)
     spam_mark_as_read = db.Column(db.Boolean, nullable=False, default=True)
     spam_threshold = db.Column(db.Integer, nullable=False, default=lambda:int(app.config.get("DEFAULT_SPAM_THRESHOLD", 80)))
+    change_pw_next_login = db.Column(db.Boolean, nullable=False, default=False)
 
     # Flask-login attributes
     is_authenticated = True
@@ -623,11 +624,15 @@ in clear-text regardless of the presence of the cache.
             self._credential_cache[self.get_id()] = (self.password.split('$')[3], passlib.hash.pbkdf2_sha256.using(rounds=1).hash(password))
         return result
 
-    def set_password(self, password, raw=False):
-        """ Set password for user
+    def set_password(self, password, raw=False, keep_sessions=None):
+        """ Set password for user and destroy all web sessions except those in keep_sessions
             @password: plain text password to encrypt (or, if raw is True: the hash itself)
+            @keep_sessions: True if all the sessions should be preserved, otherwise a
+set() containing the sessions to keep
         """
         self.password = password if raw else User.get_password_context().hash(password)
+        if keep_sessions is not True:
+            utils.MailuSessionExtension.prune_sessions(uid=self.email, keep=keep_sessions)
 
     def get_managed_domains(self):
         """ return list of domains this user can manage """
@@ -732,7 +737,7 @@ class Token(Base):
     user = db.relationship(User,
         backref=db.backref('tokens', cascade='all, delete-orphan'))
     password = db.Column(db.String(255), nullable=False)
-    ip = db.Column(db.String(255))
+    ip = db.Column(CommaSeparatedList, nullable=True, default=list)
 
     def check_password(self, password):
         """ verifies password against stored hash

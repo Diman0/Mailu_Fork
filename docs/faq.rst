@@ -667,7 +667,7 @@ Please note that the provided example will block the subnet from sending any ema
 
   # Fail2Ban configuration file
   [Definition]
-  failregex = : Authentication attempt from <HOST> has been rate-limited\.$
+  failregex = : Authentication attempt from <HOST>(?: for (?:[^ ]+@[^ ]+))? has been rate-limited\.$
   ignoreregex =
   journalmatch = CONTAINER_TAG=mailu-admin
 
@@ -872,9 +872,13 @@ We recommend that you run your own DNS resolver (enable unbound and update your 
 We have seen a fair amount of support requests related to the following:
 
 - dnsmasq won't forward DNSSEC results unless instructed to do so. If you are running openwrt or pi-hole, you do need to enable DNSSEC.
+- systemd-resolve won't validate DNSSEC results unless instructed to do so. If you are using it you can check its configuration using ``systemd-resolve --status | grep DNSSEC``
 - `coredns has a bug`_ that we have now worked around
+- `netplan does not play nicely with docker` by default and may need to be configured to leave docker's network alone.
 
 .. _`coredns has a bug`: https://github.com/coredns/coredns/issues/5189
+
+.. _`netplan does not play nicely with docker`: https://github.com/Mailu/Mailu/issues/2868#issuecomment-1606014184
 
 How can I add more languages to roundcube's spellchecker?
 `````````````````````````````````````````````````````````
@@ -895,3 +899,19 @@ If not, you can download the `aspell dictionary`_ you require and place it in ``
    $config['spellcheck_languages'] = array('en'=>'English', ...);
 
 .. _`aspell dictionary`: http://ftp.gnu.org/gnu/aspell/dict/0index.html
+
+
+I see a lot of "mount: Deactivated successfully." messages in the logs
+``````````````````````````````````````````````````````````````````````
+
+This is a docker & systemd issue: see `this workaround`_
+
+.. _`this workaround`: https://stackoverflow.com/questions/63622619/docker-flooding-syslog-with-run-docker-runtime-logs/69415949#69415949
+
+
+I see a lot of "Unable to lookup the TLSA record for XXX. Is the DNSSEC zone okay on ..." messages in the logs
+``````````````````````````````````````````````````````````````````````````````````````````````````````````````
+
+There may be multiple causes for it but if you are running docker 24.0.0, odds are you are `experiencing this docker bug`_ and the workaround is to switch to a different version of docker.
+
+.. _`experiencing this docker bug`: https://github.com/Mailu/Mailu/issues/2827
